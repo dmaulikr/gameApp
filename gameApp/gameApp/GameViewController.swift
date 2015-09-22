@@ -13,17 +13,24 @@ class GameViewController: NSViewController {
     
     @IBOutlet weak var gameView: GameView!
     
+    // First create a ServiceManager instance
+    var serviceManager = ServiceManager()
+    let addAccessibilityCodeNK = "elg-addAccessibilityCode"
+    let scene = SCNScene()
+    var codeText: SCNText?
+    var cameraNode: SCNNode?
+    
     override func awakeFromNib(){
-        // create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "addAccessibilityCode:", name: addAccessibilityCodeNK, object: nil)
         
         // create and add a camera to the scene
-        let cameraNode = SCNNode()
-        cameraNode.camera = SCNCamera()
-        scene.rootNode.addChildNode(cameraNode)
+        cameraNode = SCNNode()
+        cameraNode!.camera = SCNCamera()
+        scene.rootNode.addChildNode(cameraNode!)
         
         // place the camera
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 15)
+        cameraNode!.position = SCNVector3(x: 0, y: 0, z: 50)
         
         // create and add a light to the scene
         let lightNode = SCNNode()
@@ -38,16 +45,6 @@ class GameViewController: NSViewController {
         ambientLightNode.light!.type = SCNLightTypeAmbient
         ambientLightNode.light!.color = NSColor.darkGrayColor()
         scene.rootNode.addChildNode(ambientLightNode)
-        
-        // retrieve the ship node
-        let ship = scene.rootNode.childNodeWithName("ship", recursively: true)!
-        
-        // animate the 3d object
-        let animation = CABasicAnimation(keyPath: "rotation")
-        animation.toValue = NSValue(SCNVector4: SCNVector4(x: CGFloat(0), y: CGFloat(1), z: CGFloat(0), w: CGFloat(M_PI)*2))
-        animation.duration = 3
-        animation.repeatCount = MAXFLOAT //repeat forever
-        ship.addAnimation(animation, forKey: nil)
 
         // set the scene to the view
         self.gameView!.scene = scene
@@ -59,7 +56,28 @@ class GameViewController: NSViewController {
         self.gameView!.showsStatistics = true
         
         // configure the view
-        self.gameView!.backgroundColor = NSColor.blackColor()
+        self.gameView!.backgroundColor = NSColor.whiteColor()
+    }
+    
+    func addAccessibilityCode(notification: NSNotification) {
+        print("In addAccessibilityCode")
+        
+        // Get code information
+        let userInfo:Dictionary<String,Int!> = notification.userInfo as! Dictionary<String,Int!>
+        let accessibilityCode = userInfo["accessibilityCode"]
+        
+        // Create SCNText with necessary code information
+        codeText = SCNText(string: String(accessibilityCode!), extrusionDepth: 2.0)
+        codeText!.firstMaterial?.diffuse.contents = NSColor.blackColor()
+        codeText!.font = NSFont.systemFontOfSize(8.0)
+        let codeNode = SCNNode(geometry: codeText)
+        codeNode.position = SCNVector3Make(0, 0, 0)
+        
+        let cameraConstraint = SCNLookAtConstraint(target: codeNode)
+        cameraNode?.constraints = [cameraConstraint]
+        
+        scene.rootNode.addChildNode(codeNode)
+        
     }
 
 }

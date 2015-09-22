@@ -15,6 +15,7 @@
 		9E230F191BB07F100046CC4E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E230F171BB07F100046CC4E /* MainMenu.xib */; };
 		9E230F241BB07F100046CC4E /* gameAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F231BB07F100046CC4E /* gameAppTests.swift */; };
 		9E230F2F1BB07F100046CC4E /* gameAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F2E1BB07F100046CC4E /* gameAppUITests.swift */; };
+		9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F3C1BB07F500046CC4E /* ServiceManager.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		9E230F2A1BB07F100046CC4E /* gameAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = gameAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E230F2E1BB07F100046CC4E /* gameAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gameAppUITests.swift; sourceTree = "<group>"; };
 		9E230F301BB07F100046CC4E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E230F3C1BB07F500046CC4E /* ServiceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 			children = (
 				9E230F0D1BB07F100046CC4E /* AppDelegate.swift */,
 				9E230F0F1BB07F100046CC4E /* GameView.swift */,
+				9E230F3C1BB07F500046CC4E /* ServiceManager.swift */,
 				9E230F111BB07F100046CC4E /* GameViewController.swift */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
@@ -261,6 +264,7 @@
 				9E230F101BB07F100046CC4E /* GameView.swift in Sources */,
 				9E230F121BB07F100046CC4E /* GameViewController.swift in Sources */,
 				9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */,
+				9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
