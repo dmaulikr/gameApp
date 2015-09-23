@@ -112,6 +112,9 @@ extension ServiceManager : MCSessionDelegate {
     
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
         print("peer \(peerID) didReceiveData: \(data)")
+        
+        let dataString = NSString(data: data, encoding: NSUTF8StringEncoding)
+        print(dataString)
     }
     
     func session(session: MCSession, didReceiveStream stream: NSInputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
