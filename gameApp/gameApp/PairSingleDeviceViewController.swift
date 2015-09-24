@@ -21,7 +21,12 @@ class PairSingleDeviceViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let viewLayer = CALayer()
+        viewLayer.backgroundColor = CGColorCreateGenericRGB(0.000, 0.114, 0.212, 1.00)
+        pairDeviceView.wantsLayer = true
+        pairDeviceView.layer = viewLayer
         self.view.addSubview(pairDeviceView)
+        
         // Do view setup here.
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "addAccessibilityCode:", name: addAccessibilityCodeNK, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "switchToGameView", name: switchToGameViewNK, object: nil)
@@ -37,7 +42,7 @@ class PairSingleDeviceViewController: NSViewController {
     func switchToGameView() {
         dispatch_async(dispatch_get_main_queue(), {
         self.gameViewController = GameViewController(nibName: "GameViewController", bundle: NSBundle.mainBundle())
-        NSApp.mainWindow?.contentView?.addSubview(self.gameViewController!.view)
+        self.view.replaceSubview(self.pairDeviceView, with: self.gameViewController!.view)
         })
     }
     

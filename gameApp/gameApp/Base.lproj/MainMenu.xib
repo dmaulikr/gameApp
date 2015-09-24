@@ -650,10 +650,10 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="-768" y="0.0" width="2048" height="777"/>
+            <rect key="contentRect" x="24" y="26" width="1250" height="700"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
-            <view key="contentView" id="372">
-                <rect key="frame" x="0.0" y="0.0" width="2048" height="777"/>
+            <view key="contentView" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" id="372">
+                <rect key="frame" x="0.0" y="0.0" width="1250" height="700"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
             <point key="canvasLocation" x="279" y="1392.5"/>
@@ -671,49 +671,49 @@
                 <outlet property="view" destination="372" id="umC-d6-V2v"/>
             </connections>
         </viewController>
-        <customView id="CP9-8V-Nh2">
-            <rect key="frame" x="0.0" y="0.0" width="2048" height="777"/>
+        <customView horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" id="CP9-8V-Nh2">
+            <rect key="frame" x="0.0" y="0.0" width="1250" height="700"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Vwi-mJ-1os">
-                    <rect key="frame" x="820" y="472" width="303" height="58"/>
+                <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Vwi-mJ-1os">
+                    <rect key="frame" x="474" y="434" width="303" height="58"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="299" id="aOP-9n-axG"/>
-                        <constraint firstAttribute="height" constant="58" id="iiV-u3-N7v"/>
+                        <constraint firstAttribute="width" constant="299" id="Yw5-Ir-bjb"/>
+                        <constraint firstAttribute="height" constant="58" id="ef2-Hm-AUt"/>
                     </constraints>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Pair iOS Controller" id="sfb-Hd-s8K">
                         <font key="font" size="30" name=".HelveticaNeueDeskInterface-Regular"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RKu-ho-Vxi">
-                    <rect key="frame" x="907" y="336" width="133" height="60"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Code" id="lWh-Bw-m33">
-                        <font key="font" size="50" name=".HelveticaNeueDeskInterface-Bold"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WCB-6E-06Z">
-                    <rect key="frame" x="777" y="433" width="393" height="22"/>
+                    <rect key="frame" x="429" y="390" width="393" height="22"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="389" id="9gV-Am-bj1"/>
+                        <constraint firstAttribute="width" constant="389" id="WI0-qc-pTH"/>
                     </constraints>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Enter the code below into your iOS Controller:" id="pnv-5I-xRl">
                         <font key="font" size="18" name=".HelveticaNeueDeskInterface-Regular"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RKu-ho-Vxi">
+                    <rect key="frame" x="559" y="295" width="133" height="60"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Code" id="lWh-Bw-m33">
+                        <font key="font" size="50" name=".HelveticaNeueDeskInterface-Bold"/>
+                        <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
             </subviews>
             <constraints>
-                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="RKu-ho-Vxi" secondAttribute="centerX" id="33f-LU-oiG"/>
-                <constraint firstItem="Vwi-mJ-1os" firstAttribute="top" secondItem="CP9-8V-Nh2" secondAttribute="top" constant="247" id="3Fe-Pd-bPZ"/>
-                <constraint firstItem="Vwi-mJ-1os" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="822" id="8Ug-jJ-cTM"/>
-                <constraint firstItem="WCB-6E-06Z" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="779" id="Blq-0L-Z6L"/>
-                <constraint firstItem="RKu-ho-Vxi" firstAttribute="top" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="37" id="CSa-pN-ae2"/>
-                <constraint firstItem="WCB-6E-06Z" firstAttribute="top" secondItem="Vwi-mJ-1os" secondAttribute="bottom" constant="17" id="yis-dB-rS4"/>
+                <constraint firstItem="Vwi-mJ-1os" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="476" id="4y1-bf-w9P"/>
+                <constraint firstItem="WCB-6E-06Z" firstAttribute="top" secondItem="Vwi-mJ-1os" secondAttribute="bottom" constant="22" id="719-FV-axd"/>
+                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="RKu-ho-Vxi" secondAttribute="centerX" id="hgH-cd-zcZ"/>
+                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="Vwi-mJ-1os" secondAttribute="centerX" id="n2U-Z6-vym"/>
+                <constraint firstItem="RKu-ho-Vxi" firstAttribute="top" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="35" id="ods-vA-y3U"/>
+                <constraint firstItem="Vwi-mJ-1os" firstAttribute="top" secondItem="CP9-8V-Nh2" secondAttribute="top" constant="208" id="x8W-uA-1is"/>
             </constraints>
             <point key="canvasLocation" x="279" y="542"/>
         </customView>
