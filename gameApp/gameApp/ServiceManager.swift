@@ -14,6 +14,7 @@ class ServiceManager : NSObject {
     // Service type must be a unique string, at most 15 characters long
     private let GameServiceType = "elg-escape-game"
     private let addAccessibilityCodeNK = "elg-addAccessibilityCode"
+    private let switchToGameViewNK = "elg-switchToGameView"
     
     private let peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
     private let serviceAdvertiser : MCNearbyServiceAdvertiser
@@ -100,6 +101,11 @@ extension MCSessionState {
 extension ServiceManager : MCSessionDelegate {
     func session(session: MCSession, peer peerID: MCPeerID, didChangeState state: MCSessionState) {
         print("peer \(peerID) didChangeState: \(state.stringValue())")
+        
+        if(state == MCSessionState.Connected) {
+            // Here must switch to the game view for now
+            NSNotificationCenter.defaultCenter().postNotificationName(switchToGameViewNK, object: self, userInfo: nil)
+        }
     }
     
     func session(session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, withProgress progress: NSProgress) {
@@ -113,11 +119,55 @@ extension ServiceManager : MCSessionDelegate {
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
         print("peer \(peerID) didReceiveData: \(data)")
         
-        let dataString = NSString(data: data, encoding: NSUTF8StringEncoding)
-        print(dataString)
+        var strokeInfo: Keystroke = Keystroke()
+        data.getBytes(&strokeInfo, length: sizeof(Keystroke))
+        
+        switch strokeInfo.interactionType! {
+        case .Trackpad:
+            print("it was a trackpad event")
+            
+            switch strokeInfo.trackpadType! {
+            case .Movement:
+                print("the trackpad event occurred in the movement trackpad")
+                switch strokeInfo.gestureType! {
+                case .Tap:
+                    print("the gesture type was a tap")
+                case .Pan:
+                    print("the gesture type was a pan")
+                }
+            case .Camera:
+                print("the trackpad event occured in the camera trackpad")
+                
+                switch strokeInfo.gestureType! {
+                case .Tap:
+                    print("the gesture type was a tap")
+                case .Pan:
+                    print("the gesture type was a pan")
+                }
+            }
+            
+        case .Button:
+            print("it was a button event")
+            
+            switch strokeInfo.button! {
+            case .Crouch:
+                print("the button event was crouch")
+            case .Jump:
+                print("the button event was jump")
+            case .Attack:
+                print ("the button event was attack")
+            case .Interact:
+                print ("the button event was interact")
+            }
+        }
+
     }
     
     func session(session: MCSession, didReceiveStream stream: NSInputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         print("peer \(peerID) didReceiveStream, with name: \(streamName)")
+    }
+    
+    func session(session: MCSession, didReceiveCertificate certificate: [AnyObject]?, fromPeer peerID: MCPeerID, certificateHandler: (Bool) -> Void) {
+        certificateHandler(true)
     }
 }

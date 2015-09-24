@@ -9,13 +9,15 @@
 /* Begin PBXBuildFile section */
 		9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F0D1BB07F100046CC4E /* AppDelegate.swift */; };
 		9E230F101BB07F100046CC4E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F0F1BB07F100046CC4E /* GameView.swift */; };
-		9E230F121BB07F100046CC4E /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F111BB07F100046CC4E /* GameViewController.swift */; };
 		9E230F141BB07F100046CC4E /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E230F131BB07F100046CC4E /* art.scnassets */; };
 		9E230F161BB07F100046CC4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E230F151BB07F100046CC4E /* Assets.xcassets */; };
 		9E230F191BB07F100046CC4E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E230F171BB07F100046CC4E /* MainMenu.xib */; };
 		9E230F241BB07F100046CC4E /* gameAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F231BB07F100046CC4E /* gameAppTests.swift */; };
 		9E230F2F1BB07F100046CC4E /* gameAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F2E1BB07F100046CC4E /* gameAppUITests.swift */; };
 		9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F3C1BB07F500046CC4E /* ServiceManager.swift */; settings = {ASSET_TAGS = (); }; };
+		9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */; settings = {ASSET_TAGS = (); }; };
+		9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */; settings = {ASSET_TAGS = (); }; };
+		9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +41,6 @@
 		9E230F0A1BB07F100046CC4E /* gameApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gameApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E230F0D1BB07F100046CC4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E230F0F1BB07F100046CC4E /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
-		9E230F111BB07F100046CC4E /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		9E230F131BB07F100046CC4E /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		9E230F151BB07F100046CC4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E230F181BB07F100046CC4E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -51,6 +52,9 @@
 		9E230F2E1BB07F100046CC4E /* gameAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gameAppUITests.swift; sourceTree = "<group>"; };
 		9E230F301BB07F100046CC4E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E230F3C1BB07F500046CC4E /* ServiceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
+		9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairSingleDeviceViewController.swift; sourceTree = "<group>"; };
+		9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GameViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,10 +108,12 @@
 				9E230F0D1BB07F100046CC4E /* AppDelegate.swift */,
 				9E230F0F1BB07F100046CC4E /* GameView.swift */,
 				9E230F3C1BB07F500046CC4E /* ServiceManager.swift */,
-				9E230F111BB07F100046CC4E /* GameViewController.swift */,
+				9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */,
+				9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
+				9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */,
 				9E230F1A1BB07F100046CC4E /* Info.plist */,
 			);
 			path = gameApp;
@@ -234,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */,
 				9E230F161BB07F100046CC4E /* Assets.xcassets in Resources */,
 				9E230F141BB07F100046CC4E /* art.scnassets in Resources */,
 				9E230F191BB07F100046CC4E /* MainMenu.xib in Resources */,
@@ -261,8 +268,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */,
 				9E230F101BB07F100046CC4E /* GameView.swift in Sources */,
-				9E230F121BB07F100046CC4E /* GameViewController.swift in Sources */,
+				9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */,
 				9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */,
 				9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */,
 			);
@@ -488,6 +496,7 @@
 				9E230F351BB07F100046CC4E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9E230F361BB07F100046CC4E /* Build configuration list for PBXNativeTarget "gameAppTests" */ = {
 			isa = XCConfigurationList;
@@ -496,6 +505,7 @@
 				9E230F381BB07F100046CC4E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9E230F391BB07F100046CC4E /* Build configuration list for PBXNativeTarget "gameAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -504,6 +514,7 @@
 				9E230F3B1BB07F100046CC4E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
