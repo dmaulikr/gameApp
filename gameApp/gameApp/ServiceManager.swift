@@ -15,10 +15,11 @@ class ServiceManager : NSObject {
     private let GameServiceType = "elg-escape-game"
     private let addAccessibilityCodeNK = "elg-addAccessibilityCode"
     private let switchToGameViewNK = "elg-switchToGameView"
+    let kPlayerControlsNK = "elg-playerControls"
     
     private let peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
     private let serviceAdvertiser : MCNearbyServiceAdvertiser
-    var player1Code: Int?
+    var player1Code: String?
     
     override init () {
         self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: peerId, discoveryInfo: nil, serviceType: GameServiceType)
@@ -44,21 +45,21 @@ class ServiceManager : NSObject {
         return session
         }()
     
-    func randomizedConnectionCode() -> Int {
-        let randomInt = Int(arc4random_uniform(10_000))
+    func randomizedConnectionCode() -> String {
+        let randomInt: Int = Int(arc4random_uniform(10_000))
         var randomIntString = String(randomInt)
         
         if randomInt <= 9 {
             randomIntString = ("000\(randomIntString)")
-            return Int(randomIntString)!
+            return randomIntString
         } else if randomInt <= 99 {
             randomIntString = ("00\(randomIntString)")
-            return Int(randomIntString)!
+            return randomIntString
         } else if randomInt <= 999 {
             randomIntString = ("0\(randomIntString)")
-            return Int(randomIntString)!
+            return randomIntString
         } else {
-            return randomInt
+            return String(randomInt)
         }
     }
     
@@ -76,7 +77,7 @@ extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
         // if it does, accept the invitation
         let codeSent = NSString(data: context!, encoding: NSUTF8StringEncoding)
         
-        if Int(codeSent as! String) == player1Code {
+        if codeSent == player1Code {
             print("Correct code!")
             invitationHandler(true, self.session)
         } else {
@@ -93,7 +94,6 @@ extension MCSessionState {
         case .NotConnected: return "Not Connected"
         case .Connecting: return "Connecting"
         case .Connected: return "Connected"
-        default: return "Unknown Status"
         }
     }
 }
@@ -117,50 +117,10 @@ extension ServiceManager : MCSessionDelegate {
     }
     
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
-        print("peer \(peerID) didReceiveData: \(data)")
         
-        var strokeInfo: Keystroke = Keystroke()
-        data.getBytes(&strokeInfo, length: sizeof(Keystroke))
+        // Send notification to GameControllerView that controls have been sent
+        NSNotificationCenter.defaultCenter().postNotificationName(kPlayerControlsNK, object: self, userInfo: ["strokeInfo": data])
         
-        switch strokeInfo.interactionType! {
-        case .Trackpad:
-            print("it was a trackpad event")
-            
-            switch strokeInfo.trackpadType! {
-            case .Movement:
-                print("the trackpad event occurred in the movement trackpad")
-                switch strokeInfo.gestureType! {
-                case .Tap:
-                    print("the gesture type was a tap")
-                case .Pan:
-                    print("the gesture type was a pan")
-                }
-            case .Camera:
-                print("the trackpad event occured in the camera trackpad")
-                
-                switch strokeInfo.gestureType! {
-                case .Tap:
-                    print("the gesture type was a tap")
-                case .Pan:
-                    print("the gesture type was a pan")
-                }
-            }
-            
-        case .Button:
-            print("it was a button event")
-            
-            switch strokeInfo.button! {
-            case .Crouch:
-                print("the button event was crouch")
-            case .Jump:
-                print("the button event was jump")
-            case .Attack:
-                print ("the button event was attack")
-            case .Interact:
-                print ("the button event was interact")
-            }
-        }
-
     }
     
     func session(session: MCSession, didReceiveStream stream: NSInputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

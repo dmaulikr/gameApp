@@ -34,9 +34,9 @@ class PairSingleDeviceViewController: NSViewController {
     }
     
     func addAccessibilityCode(notification: NSNotification) {
-        let userInfo:Dictionary<String,Int!> = notification.userInfo as! Dictionary<String,Int!>
+        let userInfo:Dictionary<String,String!> = notification.userInfo as! Dictionary<String,String!>
         let accessibilityCode = userInfo["accessibilityCode"]
-        codeLabel.stringValue = String(accessibilityCode!)
+        codeLabel.stringValue = accessibilityCode!
     }
     
     func switchToGameView() {
