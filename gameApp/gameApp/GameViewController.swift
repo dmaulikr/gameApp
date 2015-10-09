@@ -88,7 +88,9 @@ class GameViewController: NSViewController {
         ground = SCNNode(geometry: groundGeometry)
         
         // create character
-        let spriteGeometry = SCNBox(width: 5, height: 12, length: 2, chamferRadius: 0)
+        let spriteWidth: CGFloat = 5
+        let spriteHeight: CGFloat = 12
+        let spriteGeometry = SCNBox(width: spriteWidth, height: spriteHeight, length: 2, chamferRadius: 0)
         let spriteMaterial = SCNMaterial()
         spriteMaterial.diffuse.contents = NSColor.blueColor()
         spriteGeometry.materials = [spriteMaterial]
@@ -118,10 +120,12 @@ class GameViewController: NSViewController {
         camera.zFar = 1_000
         self.camera = SCNNode()
         self.camera.camera = camera
-        self.camera.position = SCNVector3(x: 0, y: 17, z: 30) // over-the-shoulder view
-        cameraOrbit = SCNNode()
-        cameraOrbit.position = sprite!.position
-        cameraOrbit.addChildNode(self.camera)
+        self.camera.position = SCNVector3(x: 0, y: spriteHeight, z: spriteWidth*0.5) // over-the-shoulder view
+        // add camera as a child node of the sprite
+        //cameraOrbit = SCNNode()
+        //cameraOrbit.position = sprite!.position
+        sprite.addChildNode(self.camera)
+        //cameraOrbit.addChildNode(self.camera)
         
         // add lighting
         let ambientLight = SCNLight()
@@ -148,7 +152,7 @@ class GameViewController: NSViewController {
         let spriteBody = SCNPhysicsBody(type: .Kinematic, shape: spriteShape)
         sprite.physicsBody = spriteBody
         
-        sceneView.scene?.rootNode.addChildNode(self.cameraOrbit)
+        //sceneView.scene?.rootNode.addChildNode(self.cameraOrbit)
         sceneView.scene?.rootNode.addChildNode(light)
         sceneView.scene?.rootNode.addChildNode(ground)
         sceneView.scene?.rootNode.addChildNode(sprite)
@@ -160,7 +164,7 @@ class GameViewController: NSViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: kPlayerControlsNK, object: nil)
         
         oldCameraRotation = self.camera.eulerAngles
-        oldCameraOrbitEuler = self.cameraOrbit.eulerAngles
+        //oldCameraOrbitEuler = self.cameraOrbit.eulerAngles
         
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
         movementTrackpadInUse = false
@@ -214,16 +218,17 @@ class GameViewController: NSViewController {
                         }
                         
                         // Rotates the sprites in the direction they are moving
-                        sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+                        //sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+                        sprite.eulerAngles = SCNVector3(x: 0, y: camera.eulerAngles.y, z: 0)
                         
                          // first check if the pan is even significant
                         if abs(panx) > 20 || abs(pany) > 20 {
                         
                         // Get the coordinate point in the scene of the forward facing sprite
-                        let forwardFacingSceneCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: cameraOrbit)
+                        let forwardFacingSceneCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: sprite)
                         
                         // Get the forward movement direction vector
-                        let forwardMovementDirection = SCNVector3(x: forwardFacingSceneCoordinates!.x - cameraOrbit.position.x, y: forwardFacingSceneCoordinates!.y - cameraOrbit.position.y, z: forwardFacingSceneCoordinates!.z - cameraOrbit.position.z)
+                        let forwardMovementDirection = SCNVector3(x: forwardFacingSceneCoordinates!.x - sprite.position.x, y: forwardFacingSceneCoordinates!.y - sprite.position.y, z: forwardFacingSceneCoordinates!.z - sprite.position.z)
                         
                         if abs(forwardMovementDirection.z) > abs(forwardMovementDirection.x) {
                             // z is the general forward direction
@@ -284,29 +289,29 @@ class GameViewController: NSViewController {
                             //print("Camera pan has just started")
                             oldCameraRotation = self.camera.presentationNode.eulerAngles
                             //oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
-                            oldCameraOrbitEuler = SCNVector3(0, 0 ,0)
+                            //oldCameraOrbitEuler = SCNVector3(0, 0 ,0)
                             //print("oldCameraOrbitEuler: \(oldCameraOrbitEuler)")
                         }
                         
                         // here rotate the camera orbit (this is left and right)
                         var newYaw = (Float)(strokeInfo.panTranslation!.x)*(Float)(M_PI)/180.0
-                        newYaw += Float(oldCameraOrbitEuler.x)
+                        newYaw += Float(oldCameraRotation.x)
                         
                         // here rotate the actual camera up and down
                         var newPitch = (Float)(strokeInfo.panTranslation!.y)*(Float)(M_PI)/180.0
-                        newPitch += Float(oldCameraOrbitEuler.y)
+                        newPitch += Float(oldCameraRotation.y)
                         
                         //newCameraOrbitEuler = SCNVector3(-newPitch+Float(oldCameraOrbitEuler.x), -newYaw+Float(oldCameraOrbitEuler.y), Float(oldCameraOrbitEuler.z))
                         //newCameraOrbitEuler = SCNVector3(-newPitch, -newYaw, Float(oldCameraOrbitEuler.z))
                         
-                        newCameraOrbitEuler = SCNVector3(-newPitch, -newYaw, 0)
+                        newCameraRotation = SCNVector3(-newPitch, -newYaw, 0)
                         // Rotates the sprites in the direction the camera is facing
-                        sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+                        sprite.eulerAngles = SCNVector3(x: 0, y: camera.eulerAngles.y, z: 0)
                         //print("newCameraOrbitEuler: \(newCameraOrbitEuler)")
                     } else {
                         //print("Camera pan has just ended")
                         // pan has just ended
-                        oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
+                        //oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
                         //print("oldCameraOrbitEuler: \(oldCameraOrbitEuler)")
                     }
                 }
@@ -353,8 +358,8 @@ extension GameViewController : SCNSceneRendererDelegate {
         if movementTrackpadInUse == true {
             let playerSpeed:CGFloat = 0.7
             sprite!.position = SCNVector3(sprite.presentationNode.position.x + movementDirectionVector!.x*playerSpeed, sprite.presentationNode.position.y + movementDirectionVector!.y*playerSpeed, sprite.presentationNode.position.z + movementDirectionVector!.z*playerSpeed)
-            cameraOrbit!.position = sprite!.position
-            sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+            //cameraOrbit!.position = sprite!.position
+            sprite.eulerAngles = SCNVector3(x: 0, y: camera.eulerAngles.y, z: 0)
         }
         
 //        if let changedPosition = newPosition {
@@ -362,23 +367,10 @@ extension GameViewController : SCNSceneRendererDelegate {
 //            cameraOrbit!.position = sprite!.position
 //        }
         
-        //        if let changedCameraRotation = newCameraRotation {
-        //            self.camera.eulerAngles = changedCameraRotation
-        //        }
+                if let changedCameraRotation = newCameraRotation {
+                    self.camera.eulerAngles = changedCameraRotation
+                }
         
-        if let changedCameraOrbitEuler = newCameraOrbitEuler {
-            //First convert the camera's position to that of the scene
-            
-            if changedCameraOrbitEuler.x < 0.7 {
-                self.cameraOrbit.eulerAngles = changedCameraOrbitEuler
-                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
-            } else {
-                // only update the y values since the x values will be too low
-                self.cameraOrbit.eulerAngles.y = changedCameraOrbitEuler.y
-                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
-            }
-            
-        }
     }
 }
 
