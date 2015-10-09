@@ -9,6 +9,7 @@
 //import Cocoa
 import SceneKit
 import QuartzCore
+import GLKit
 
 struct Keystroke {
     enum InteractionType {
@@ -61,13 +62,24 @@ class GameViewController: NSViewController {
     var newPosition: SCNVector3?
     var oldCameraPosition: SCNVector3!
     var newCameraPosition: SCNVector3?
-    var oldCameraRotation: SCNVector3!
+    var oldCameraRotation: SCNMatrix4!
     var newCameraRotation: SCNVector3?
     var oldCameraOrbitEuler: SCNVector3!
     var newCameraOrbitEuler: SCNVector3?
     var movementDirectionVector: SCNVector3?
+    var cameraRotationMatrix: SCNMatrix4?
+    
+    var anchorPosition: GLKVector3?
+    var currentPosition: GLKVector3?
+    var quaternionRotation: GLKQuaternion?
+    var quatStart: GLKQuaternion?
+    var quat: GLKQuaternion?
+    
+    var lastRotation: GLKMatrix4?
+    var thisRotation: GLKMatrix4?
     
     var movementTrackpadInUse: Bool!
+    var cameraTrackpadInUse: Bool!
     
     override func awakeFromNib(){
         // create a new scene
@@ -159,11 +171,23 @@ class GameViewController: NSViewController {
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: kPlayerControlsNK, object: nil)
         
-        oldCameraRotation = self.camera.eulerAngles
+        
         oldCameraOrbitEuler = self.cameraOrbit.eulerAngles
         
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
         movementTrackpadInUse = false
+        cameraRotationMatrix = SCNMatrix4MakeRotation(0, 0, 0, 0)
+        oldCameraRotation = self.cameraOrbit.transform
+        
+        quatStart = GLKQuaternionMake(0, 0, 0, 1)
+        quat = GLKQuaternionMake(0, 0, 0, 1)
+        quaternionRotation = GLKQuaternionMake(0, 0, 0, 1)
+        lastRotation = GLKMatrix4Make(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+        
+        currentPosition = SCNVector3ToGLKVector3(self.camera.presentationNode.position)
+        anchorPosition = currentPosition
+        
+        cameraTrackpadInUse = false
     }
     
     required init?(coder: NSCoder) {
@@ -279,35 +303,118 @@ class GameViewController: NSViewController {
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
                         
+                        // convert coordinate systems
+                        let panx = strokeInfo.panTranslation!.x
+                        let pany = -strokeInfo.panTranslation!.y
+                        
+                        print("panx: \(panx) pany: \(pany)")
+                        
+                        // coordinates of camera in sceneView
+                        let cameraGlobalCoordinates = sceneView.scene?.rootNode.convertPosition(self.camera.presentationNode.position, fromNode: cameraOrbit)
+                        print("cameraGlobalCoordinates: \(cameraGlobalCoordinates)")
+                        
                         // First check if the pan had just started
                         if strokeInfo.panStart == true {
+                            print("pan started")
                             //print("Camera pan has just started")
-                            oldCameraRotation = self.camera.presentationNode.eulerAngles
+                            //oldCameraRotation = self.camera.presentationNode.eulerAngles
+                            //oldCameraRotation = self.cameraOrbit.transform
                             //oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
-                            oldCameraOrbitEuler = SCNVector3(0, 0 ,0)
+                            //oldCameraOrbitEuler = SCNVector3(0, 0 ,0)
                             //print("oldCameraOrbitEuler: \(oldCameraOrbitEuler)")
+                            
+                            // Anchor position will always be where camera is
+                            anchorPosition = SCNVector3ToGLKVector3(cameraGlobalCoordinates!)
+                            print("anchorPosition: \(SCNVector3FromGLKVector3(anchorPosition!))")
+                            anchorPosition = GLKVector3Subtract(anchorPosition!, SCNVector3ToGLKVector3(cameraOrbit.presentationNode.position))
+                            anchorPosition = GLKVector3Normalize(anchorPosition!)
+                            print("anchorPosition: \(SCNVector3FromGLKVector3(anchorPosition!))")
+                            self.currentPosition = anchorPosition
+                            quatStart = quat
+                            cameraTrackpadInUse = true
                         }
                         
-                        // here rotate the camera orbit (this is left and right)
-                        var newYaw = (Float)(strokeInfo.panTranslation!.x)*(Float)(M_PI)/180.0
-                        newYaw += Float(oldCameraOrbitEuler.x)
+                        // First create a vector based on the touches
+                        // Get the coordinate point in the scene of the forward facing sprite
+                        let forwardFacingSceneCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: cameraOrbit)
                         
-                        // here rotate the actual camera up and down
-                        var newPitch = (Float)(strokeInfo.panTranslation!.y)*(Float)(M_PI)/180.0
-                        newPitch += Float(oldCameraOrbitEuler.y)
+                        // Get the forward movement direction vector
+                        let cameraFacingDirection = SCNVector3(x: forwardFacingSceneCoordinates!.x - cameraOrbit.position.x, y: forwardFacingSceneCoordinates!.y - cameraOrbit.position.y, z: forwardFacingSceneCoordinates!.z - cameraOrbit.position.z)
                         
-                        //newCameraOrbitEuler = SCNVector3(-newPitch+Float(oldCameraOrbitEuler.x), -newYaw+Float(oldCameraOrbitEuler.y), Float(oldCameraOrbitEuler.z))
-                        //newCameraOrbitEuler = SCNVector3(-newPitch, -newYaw, Float(oldCameraOrbitEuler.z))
                         
-                        newCameraOrbitEuler = SCNVector3(-newPitch, -newYaw, 0)
-                        // Rotates the sprites in the direction the camera is facing
-                        sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+                        if abs(cameraFacingDirection.z) > abs(cameraFacingDirection.x) {
+                            // z is the general forward direction
+                            let newHorizontalPoint = cameraGlobalCoordinates!.x+panx
+                            let newVerticalPoint = cameraGlobalCoordinates!.y+pany
+                            print("newHorizontal: \(newHorizontalPoint) newVertical: \(newVerticalPoint)")
+                                var touchPoint = GLKVector3Make(Float(newHorizontalPoint), Float(newVerticalPoint), 0)
+                                currentPosition = self.projectPointOnCameraOrbit(touchPoint)
+                            print("currentPosition: \(SCNVector3FromGLKVector3(currentPosition!))")
+                                
+                        } else {
+                             // x is the general facing direction
+                            let newHorizontalPoint = cameraGlobalCoordinates!.x+panx
+                            let newVerticalPoint = cameraGlobalCoordinates!.y+pany
+                            print("newHorizontal: \(newHorizontalPoint) newVertical: \(newVerticalPoint)")
+                                var touchPoint = GLKVector3Make(0, Float(newVerticalPoint), Float(newHorizontalPoint))
+                                currentPosition = self.projectPointOnCameraOrbit(touchPoint)
+                        print("currentPosition: \(SCNVector3FromGLKVector3(currentPosition!))")
+                                
+                        }
+                        
+                        // calculate current rotation
+                        // axis of rotation
+                        let axis = GLKVector3CrossProduct(anchorPosition!, currentPosition!)
+                        print("axis: \(SCNVector3FromGLKVector3(axis))")
+                        print("anchorPosition: \(SCNVector3FromGLKVector3(currentPosition!))")
+                        print("newPosition: \(SCNVector3FromGLKVector3(currentPosition!))")
+                        // angle of rotation
+                        let dotProduct = GLKVector3DotProduct(anchorPosition!, currentPosition!)
+                        let rotationAngle = acosf(dotProduct)
+                        
+                        //var quaternionRotation = GLKQuaternionMakeWithAngleAndVector3Axis(rotationAngle*2, axis)
+                        quaternionRotation = GLKQuaternionMakeWithAngleAndVector3Axis(rotationAngle*2, axis)
+                        quaternionRotation = GLKQuaternionNormalize(quaternionRotation!)
+
+                        
+                        // Instead of using euler angles, use Matrix Rotation & Multiplication
+//                        let rotateAroundY = SCNMatrix4MakeRotation((CGFloat)(strokeInfo.panTranslation!.x)*(CGFloat)(M_PI)/180.0, 0, -1, 0)
+//                        
+//                        let rotateAroundX = SCNMatrix4MakeRotation((CGFloat)(strokeInfo.panTranslation!.y)*(CGFloat)(M_PI)/180.0, -1, 0, 0)
+//                        
+//                        let rotationMatrix = SCNMatrix4Mult(rotateAroundX, rotateAroundY)
+//                        cameraRotationMatrix = rotationMatrix
+                        
+                        // here rotate the camera orbit across the y axis (left and right gesture)
+//                        var newYaw = (Float)(panx)*(Float)(M_PI)/180.0
+//                        print("newYaw: \(newYaw)")
+//                        newYaw += Float(oldCameraOrbitEuler.x)
+//                        print("addedYaw: \(newYaw)")
+//                        //newYaw = newYaw - Float(oldCameraOrbitEuler.x)
+//                        //print("subtractedYaw: \(newYaw)")
+//                        
+//                        // here rotate the actual camera across the x axis (up and down gesture)
+//                        var newPitch = (Float)(pany)*(Float)(M_PI)/180.0
+//                        print("newPitch: \(newPitch)")
+//                        newPitch += Float(oldCameraOrbitEuler.y)
+//                        print("addedPitch: \(newPitch)")
+//                        //newPitch = newPitch - Float(oldCameraOrbitEuler.y)
+//                        //print("subtractedPitch: \(newPitch)")
+//                        
+//                        //newCameraOrbitEuler = SCNVector3(-newPitch+Float(oldCameraOrbitEuler.x), -newYaw+Float(oldCameraOrbitEuler.y), Float(oldCameraOrbitEuler.z))
+//                        //newCameraOrbitEuler = SCNVector3(-newPitch, -newYaw, Float(oldCameraOrbitEuler.z))
+//                        
+//                        newCameraOrbitEuler = SCNVector3(-newPitch, newYaw, 0)
+//                        print("newCameraOrbitEuler: \(newCameraOrbitEuler)")
+//                        // Rotates the sprites in the direction the camera is facing
+//                        sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
                         //print("newCameraOrbitEuler: \(newCameraOrbitEuler)")
                     } else {
                         //print("Camera pan has just ended")
                         // pan has just ended
-                        oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
+                        //oldCameraOrbitEuler = self.cameraOrbit.presentationNode.eulerAngles
                         //print("oldCameraOrbitEuler: \(oldCameraOrbitEuler)")
+                        cameraTrackpadInUse = false
                     }
                 }
             }
@@ -332,6 +439,40 @@ class GameViewController: NSViewController {
         let normalizedVector = SCNVector3Make(vector.x/CGFloat(vectorMagnitude), vector.y/CGFloat(vectorMagnitude), vector.z/CGFloat(vectorMagnitude))
         return normalizedVector
     }
+    
+    func projectPointOnCameraOrbit(touchPoint: GLKVector3) -> GLKVector3 {
+        // Get radius of cameraOrbitSphere
+        print("in projectPointOnCameraOrbit")
+        let cameraOrbitRadius = sqrt(((camera.position.z)*(camera.position.z))+((camera.position.y)*(camera.position.y)))
+        print("cameraOrbitRadius: \(cameraOrbitRadius)")
+        
+        // calculate the third point on the sphere
+        
+        // we know r^2 = x^2 + y^2 + z^2. Use this to calculate the point on the sphere
+        // z = sqrt((cameraOrbitRadius*cameraOrbitRadius) - (x+panx)^2 + (y+pany)^2)
+        let depthCoordinate = sqrt(Float(cameraOrbitRadius*cameraOrbitRadius)-(touchPoint.x*touchPoint.x)+(touchPoint.y*touchPoint.y))
+        print("depthCoordinate: \(depthCoordinate)")
+        print("touchPointx: \(touchPoint.x) touchPointy: \(touchPoint.y)")
+        
+        let touchPointOnSphere: GLKVector3!
+        
+        // We know either the x or the z could be the depth coordinate
+        if touchPoint.z == 0 {
+            // we know the depth coordinate is z
+            print("depth coordinate is z")
+            touchPointOnSphere = GLKVector3Make(Float(touchPoint.x), Float(touchPoint.y), Float(depthCoordinate))
+        } else {
+            // the depth coordinate is x
+            print("depth coordinate is x")
+            touchPointOnSphere = GLKVector3Make(Float(depthCoordinate), Float(touchPoint.y), Float(touchPoint.x))
+        }
+        
+        let cameraOrbitCenter = SCNVector3ToGLKVector3(cameraOrbit.presentationNode.position)
+        
+        let touchPointVector = GLKVector3Subtract(touchPointOnSphere, cameraOrbitCenter)
+        
+        return GLKVector3Normalize(touchPointVector)
+    }
 }
 
 extension GameViewController : SCNSceneRendererDelegate {
@@ -354,7 +495,7 @@ extension GameViewController : SCNSceneRendererDelegate {
             let playerSpeed:CGFloat = 0.7
             sprite!.position = SCNVector3(sprite.presentationNode.position.x + movementDirectionVector!.x*playerSpeed, sprite.presentationNode.position.y + movementDirectionVector!.y*playerSpeed, sprite.presentationNode.position.z + movementDirectionVector!.z*playerSpeed)
             cameraOrbit!.position = sprite!.position
-            sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+            sprite.rotation.y = cameraOrbit.rotation.y
         }
         
 //        if let changedPosition = newPosition {
@@ -366,18 +507,38 @@ extension GameViewController : SCNSceneRendererDelegate {
         //            self.camera.eulerAngles = changedCameraRotation
         //        }
         
-        if let changedCameraOrbitEuler = newCameraOrbitEuler {
+//        if let changedCameraOrbitEuler = newCameraOrbitEuler {
             //First convert the camera's position to that of the scene
             
-            if changedCameraOrbitEuler.x < 0.7 {
-                self.cameraOrbit.eulerAngles = changedCameraOrbitEuler
-                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
-            } else {
-                // only update the y values since the x values will be too low
-                self.cameraOrbit.eulerAngles.y = changedCameraOrbitEuler.y
-                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
-            }
+//            if changedCameraOrbitEuler.x < 0.7 {
+//                self.cameraOrbit.eulerAngles = changedCameraOrbitEuler
+//                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+//            } else {
+//                // only update the y values since the x values will be too low
+//                self.cameraOrbit.eulerAngles.y = changedCameraOrbitEuler.y
+//                sprite.eulerAngles = SCNVector3(x: 0, y: cameraOrbit.eulerAngles.y, z: 0)
+//            }
+//            
+//        }
+        
+//        if let cameraRotation = cameraRotationMatrix {
+//            //cameraOrbit.transform = cameraRotation
+//            cameraOrbit.transform = SCNMatrix4Mult(oldCameraRotation, cameraRotation)
+//            //sprite.eulerAngles.y = cameraOrbit.eulerAngles.y // only need to change rotation about y axis
+//            sprite.rotation.y = cameraOrbit.rotation.y
+//        }
+        
+        
+        if cameraTrackpadInUse == true {
             
+            quat = GLKQuaternionMultiply(quaternionRotation!, quatStart!);
+            
+            thisRotation = GLKMatrix4MakeWithQuaternion(quat!)
+            //let leftMatrix = GLKMatrix4MakeTranslation(0.0, 0.0, -6.0)
+            let transform = GLKMatrix4Multiply(thisRotation!, lastRotation!)
+            cameraOrbit.transform = SCNMatrix4FromGLKMatrix4(transform)
+            print("cameraOrbitTransform: \(cameraOrbit.transform)")
+            lastRotation = thisRotation
         }
     }
 }
