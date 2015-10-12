@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2059FE1BCAF6A200A66DC2 /* Player.swift */; settings = {ASSET_TAGS = (); }; };
+		9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205A001BCAFA1000A66DC2 /* Camera.swift */; settings = {ASSET_TAGS = (); }; };
 		9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F0D1BB07F100046CC4E /* AppDelegate.swift */; };
 		9E230F101BB07F100046CC4E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E230F0F1BB07F100046CC4E /* GameView.swift */; };
 		9E230F141BB07F100046CC4E /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E230F131BB07F100046CC4E /* art.scnassets */; };
@@ -38,6 +40,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9E2059FE1BCAF6A200A66DC2 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		9E205A001BCAFA1000A66DC2 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		9E230F0A1BB07F100046CC4E /* gameApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gameApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E230F0D1BB07F100046CC4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E230F0F1BB07F100046CC4E /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
@@ -110,6 +114,8 @@
 				9E230F3C1BB07F500046CC4E /* ServiceManager.swift */,
 				9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */,
 				9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */,
+				9E205A001BCAFA1000A66DC2 /* Camera.swift */,
+				9E2059FE1BCAF6A200A66DC2 /* Player.swift */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
@@ -272,6 +278,8 @@
 				9E230F101BB07F100046CC4E /* GameView.swift in Sources */,
 				9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */,
 				9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */,
+				9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */,
+				9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */,
 				9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
