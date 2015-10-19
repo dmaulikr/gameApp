@@ -8,6 +8,7 @@
 
 //import Cocoa
 import SceneKit
+import SpriteKit
 import QuartzCore
 
 struct ColliderType {
@@ -15,6 +16,8 @@ struct ColliderType {
     static let Bot1 = 0b10
     static let Bot2 = 0b100
     static let Ground = 0b1000
+    static let Weapon = 0b10000
+    static let Bullet = 0b100000
 }
 
 struct Keystroke {
@@ -58,18 +61,25 @@ class GameViewController: NSViewController {
     
     let kPlayerControlsNK = "elg-playerControls"
     var sceneView: SCNView!
+    var hud: HUD!
     var sprite: Player!
     var camera: Camera!
     var ground: SCNNode!
     var light: SCNNode!
+    var weapon: SCNNode!
+    var bullet: SCNNode?
     
     var movementDirectionVector: SCNVector3?
+    var shootingDirectionVector: SCNVector3?
+    var bulletStart: SCNVector3?
     
     var oldHorizontalRotation: SCNMatrix4?
     var oldVerticalRotation: SCNMatrix4?
     
     var horizontalRotation: SCNMatrix4?
     var verticalRotation: SCNMatrix4?
+    
+    var fired: Bool?
     
     override func awakeFromNib(){
         // create a new scene
@@ -78,7 +88,17 @@ class GameViewController: NSViewController {
         sceneView.scene?.physicsWorld.contactDelegate = self
         sceneView.playing = true
         sceneView.delegate = self
+        
+        // Add SKScene to function like a HUD
+        hud = HUD(size: sceneView.bounds.size)
+        
+        // Needs to be initialized in main queue
+        dispatch_async(dispatch_get_main_queue(), {
+        self.sceneView.overlaySKScene = self.hud
+        })
+        
         self.view.addSubview(sceneView);
+        
         
         // create ground
         let groundGeometry = SCNFloor()
@@ -106,7 +126,7 @@ class GameViewController: NSViewController {
         bot1.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: bot1Shape)
         bot1.categoryBitMask = ColliderType.Bot1
         bot1.physicsBody!.categoryBitMask = ColliderType.Bot1
-        bot1.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground
+        bot1.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground | ColliderType.Weapon
         
         let bot2Geometry = SCNBox(width: 15, height: 15, length: 15, chamferRadius: 1)
         let bot2Material = SCNMaterial()
@@ -117,12 +137,27 @@ class GameViewController: NSViewController {
         let bot2Shape = SCNPhysicsShape(geometry: bot2Geometry, options: nil)
         bot2.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: bot2Shape)
         bot2.physicsBody!.categoryBitMask = ColliderType.Bot2
-        bot2.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground
+        bot2.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground | ColliderType.Weapon
         
         // create and add a camera to the scene
         self.camera = Camera()
         self.camera.position = SCNVector3(x: 0, y: sprite.height, z: sprite.length/2) // over-the-shoulder view
         sprite.addChildNode(self.camera)
+        
+        // create weapon
+        let weaponScene = SCNScene(named: "art.scnassets/Handgun.dae")
+        let nodeArray = weaponScene!.rootNode.childNodes
+        
+        for childNode in nodeArray {
+            weapon = childNode
+            weapon.position = SCNVector3Make(1, -3, -3)
+            let weaponGeometry = SCNBox(width: 5, height: 5, length: 5, chamferRadius: 1)
+            let weaponShape = SCNPhysicsShape(geometry: weaponGeometry, options: nil)
+            weapon.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: weaponShape)
+            weapon.physicsBody?.categoryBitMask = ColliderType.Weapon
+            weapon.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Bot1 | ColliderType.Bot2
+            camera.addChildNode(weapon)
+        }
         
         // add lighting
         let ambientLight = SCNLight()
@@ -151,11 +186,15 @@ class GameViewController: NSViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: kPlayerControlsNK, object: nil)
         
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
+        shootingDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
+        bulletStart = SCNVector3Make(0, 0, 0)
         
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         verticalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         oldHorizontalRotation = sprite.transform
         oldVerticalRotation = self.camera.transform
+        
+        fired = false
     }
     
     required init?(coder: NSCoder) {
@@ -199,15 +238,9 @@ class GameViewController: NSViewController {
                         ************/
                         
                         // first check if the pan is even significant
-                        if abs(panx) > 20 || abs(pany) > 20 {
+                        if abs(panx) > 15 || abs(pany) > 15 {
                             
-                            // Get the coordinate point in the scene of the forward facing sprite
-                            let forwardFacingSceneCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: sprite)
-                            
-                            // Get the forward movement direction vector
-                            let forwardMovementDirection = SCNVector3(x: forwardFacingSceneCoordinates!.x - sprite.presentationNode.position.x, y: forwardFacingSceneCoordinates!.y - sprite.presentationNode.position.y, z: forwardFacingSceneCoordinates!.z - sprite.presentationNode.position.z)
-                            
-                            self.setMovementDirection(forwardMovementDirection, panx: panx, pany: pany)
+                            self.setMovementDirection(self.forwardMovementDirectionVector(), panx: panx, pany: pany)
                             
                         } else {
                             // pan gesture not significant
@@ -241,6 +274,7 @@ class GameViewController: NSViewController {
                         // Create a matrix that represents the horizontal rotation
                         horizontalRotation = SCNMatrix4MakeRotation(CGFloat(horizontalAngle), 0, 1, 0)
                         
+                        
                         // First check if camera rotation is valid
                         if self.cameraRotationValid(CGFloat(verticalAngle)) == true {
                             verticalRotation = SCNMatrix4MakeRotation(CGFloat(verticalAngle), 1, 0, 0)
@@ -263,11 +297,55 @@ class GameViewController: NSViewController {
                 print("the button event was crouch")
             case .Attack:
                 print ("the button event was attack")
+                
+                // Create a vector based on the bullet direction
+                
+                // First get camera position. This is the bullet starting point
+                bulletStart = self.camera.presentationNode.position
+                
+                // Then get the sprite facing direction. This will have the correct x and z values
+                // Already normalized
+                let forwardDirection = self.forwardMovementDirectionVector()
+                
+                // Use tan(ø) = opp/adj
+                var crosshairY: CGFloat!
+                // Now calculate the y value
+                if camera.rotation.x > 0 {
+                    //crosshair pointing up
+                    print("crosshair pointing up")
+                    print("cameraRotation: \(camera.rotation.x)")
+                    crosshairY = tan(camera.rotation.x)
+                    
+                } else {
+                    // crosshair pointing down
+                    print("crosshair pointing down")
+                    print("cameraRotation: \(camera.rotation.x)")
+                    crosshairY = tan(camera.rotation.x)
+                    crosshairY = -crosshairY
+                }
+                //let yCrosshairPosition = camera.presentationNode.position.y+crosshairY
+                //shootingDirectionVector = getNormalizedVector(SCNVector3Make(forwardDirection.x-bulletStart.x, yCrosshairPosition-bulletStart.y, forwardDirection.z-bulletStart.z))
+                
+                bulletStart!.y += crosshairY
+                print("bulletStartY: \(bulletStart)")
+                shootingDirectionVector = getNormalizedVector(SCNVector3Make(forwardDirection.x-bulletStart!.x, 0, forwardDirection.z-bulletStart!.z))
+                
+                fired = true
+                
             case .Interact:
                 print ("the button event was interact")
             }
         }
+    }
+    
+    func forwardMovementDirectionVector() -> SCNVector3 {
+        // converts sprite's forward facing coordinate system into that of the sceneView rootNode
+        let forwardFacingSceneCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: sprite)
         
+        // Get the forward movement direction vector
+        let forwardMovementDirection = SCNVector3(x: forwardFacingSceneCoordinates!.x - sprite.presentationNode.position.x, y: forwardFacingSceneCoordinates!.y - sprite.presentationNode.position.y, z: forwardFacingSceneCoordinates!.z - sprite.presentationNode.position.z)
+        
+        return forwardMovementDirection
     }
     
     func setMovementDirection(facingVector: SCNVector3, panx: CGFloat, pany: CGFloat) {
@@ -314,23 +392,8 @@ class GameViewController: NSViewController {
             return false
         }
     }
-}
-
-extension GameViewController : SCNSceneRendererDelegate {
-    func renderer(renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: NSTimeInterval) {
-        // add code
-    }
     
-    func renderer(renderer: SCNSceneRenderer, updateAtTime time: NSTimeInterval) {
-        // add code
-    }
-    
-    func renderer(renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: NSTimeInterval) {
-        // Add code
-    }
-    
-    func renderer(renderer: SCNSceneRenderer, didSimulatePhysicsAtTime time: NSTimeInterval) {
-        
+    func updateSpriteTransform() {
         // First take care of rotation
         var spriteTransform = SCNMatrix4Mult(oldHorizontalRotation!, horizontalRotation!)
         
@@ -348,6 +411,50 @@ extension GameViewController : SCNSceneRendererDelegate {
         
         oldHorizontalRotation = sprite.transform
         oldVerticalRotation = camera.transform
+    }
+    
+    func updateCrosshairAim(){
+        
+        if fired == true {
+        print("bulletStart: \(bulletStart)")
+        print("shootingDirectionVector: \(shootingDirectionVector)")
+        
+        let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
+        let bulletMaterial = SCNMaterial()
+        bulletMaterial.diffuse.contents = NSColor.orangeColor()
+        bulletGeometry.materials = [bulletMaterial]
+        let bullet = SCNNode(geometry: bulletGeometry)
+        bullet.position = bulletStart!
+        bullet.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
+        bullet.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
+        sceneView.scene?.rootNode.addChildNode(bullet)
+            
+        let impulse = SCNVector3Make(shootingDirectionVector!.x*100, shootingDirectionVector!.y*100, shootingDirectionVector!.z*100)
+        print("impulse: \(impulse)")
+        
+        bullet.physicsBody?.applyForce(impulse, impulse: true)
+        
+        fired = false
+        }
+    }
+}
+
+extension GameViewController : SCNSceneRendererDelegate {
+    func renderer(renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: NSTimeInterval) {
+        // add code
+    }
+    
+    func renderer(renderer: SCNSceneRenderer, updateAtTime time: NSTimeInterval) {
+        self.updateSpriteTransform()
+        self.updateCrosshairAim()
+    }
+    
+    func renderer(renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: NSTimeInterval) {
+        // Add code
+    }
+    
+    func renderer(renderer: SCNSceneRenderer, didSimulatePhysicsAtTime time: NSTimeInterval) {
+        // Add code
     }
 }
 

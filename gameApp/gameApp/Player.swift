@@ -14,7 +14,7 @@ class Player: SCNNode {
     let width: CGFloat = 5
     let height: CGFloat = 12
     let length: CGFloat = 2
-    let speed: CGFloat = 0.5
+    let speed: CGFloat = 0.3
     let jumpHeight: CGFloat = 6
     
     override init() {

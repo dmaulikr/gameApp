@@ -16,14 +16,32 @@ class ServiceManager : NSObject {
     private let addAccessibilityCodeNK = "elg-addAccessibilityCode"
     private let switchToGameViewNK = "elg-switchToGameView"
     let kPlayerControlsNK = "elg-playerControls"
+    let kPeerIDKey = "elg-peerid"
     
-    private let peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
-    private let serviceAdvertiser : MCNearbyServiceAdvertiser
+    var peerId: MCPeerID
+    var serviceAdvertiser : MCNearbyServiceAdvertiser
     var player1Code: String?
+    var defaults: NSUserDefaults
     
     override init () {
+        defaults = NSUserDefaults.standardUserDefaults()
+        if let peerIDData = defaults.dataForKey(kPeerIDKey) {
+        print("peerID already exists")
+        peerId = NSKeyedUnarchiver.unarchiveObjectWithData(peerIDData) as! MCPeerID
+        print("peerID: \(peerId)")
+        } else {
+            print("peerID does not yet exist. Create a new one.")
+        peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
+        print("peerID: \(peerId)")
+        let peerIDData = NSKeyedArchiver.archivedDataWithRootObject(peerId)
+        defaults.setObject(peerIDData, forKey: kPeerIDKey)
+        defaults.synchronize()
+        }
+        
         self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: peerId, discoveryInfo: nil, serviceType: GameServiceType)
+        
         super.init()
+        
         self.serviceAdvertiser.delegate = self
         self.serviceAdvertiser.startAdvertisingPeer()
         self.player1Code = randomizedConnectionCode()
