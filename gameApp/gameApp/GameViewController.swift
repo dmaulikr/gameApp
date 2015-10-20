@@ -12,12 +12,11 @@ import SpriteKit
 import QuartzCore
 
 struct ColliderType {
-    static let Player = 0b1
-    static let Bot1 = 0b10
-    static let Bot2 = 0b100
-    static let Ground = 0b1000
-    static let Weapon = 0b10000
-    static let Bullet = 0b100000
+    static let Player = 0x1 << 0
+    static let Enemy = 0x1 << 1
+    static let Ground = 0x1 << 2
+    static let Weapon = 0x1 << 3
+    static let Bullet = 0x1 << 4
 }
 
 struct Keystroke {
@@ -64,9 +63,9 @@ class GameViewController: NSViewController {
     var hud: HUD!
     var sprite: Player!
     var camera: Camera!
+    var weapon: Weapon!
     var ground: SCNNode!
     var light: SCNNode!
-    var weapon: SCNNode!
     var bullet: SCNNode?
     
     var movementDirectionVector: SCNVector3?
@@ -89,55 +88,36 @@ class GameViewController: NSViewController {
         sceneView.playing = true
         sceneView.delegate = self
         
-        // Add SKScene to function like a HUD
-        hud = HUD(size: sceneView.bounds.size)
         
         // Needs to be initialized in main queue
         dispatch_async(dispatch_get_main_queue(), {
+        // Add SKScene to function like a HUD
+        self.hud = HUD(size: self.sceneView.bounds.size)
         self.sceneView.overlaySKScene = self.hud
         })
         
-        self.view.addSubview(sceneView);
+        self.view.addSubview(self.sceneView);
         
         
         // create ground
         let groundGeometry = SCNFloor()
         groundGeometry.reflectivity = 0
         let groundMaterial = SCNMaterial()
-        groundMaterial.diffuse.contents = NSColor.lightGrayColor()
+        groundMaterial.diffuse.contents = NSImage(named: "art.scnassets/grass.jpg")
         groundGeometry.materials = [groundMaterial]
         ground = SCNNode(geometry: groundGeometry)
         let groundShape = SCNPhysicsShape(geometry: groundGeometry, options: nil)
         ground.physicsBody = SCNPhysicsBody(type: .Static, shape: groundShape)
         ground.categoryBitMask = ColliderType.Ground
+        ground.physicsBody?.categoryBitMask = ColliderType.Ground
         
         // create character
         sprite = Player()
-        sprite.position = SCNVector3Make(0, 2, 0)
+        sprite.position = SCNVector3Make(0, 0, 0)
         
-        // create random bots to test for movement in distance
-        let bot1Geometry = SCNBox(width: 15, height: 15, length: 15, chamferRadius: 1)
-        let bot1Material = SCNMaterial()
-        bot1Material.diffuse.contents = NSColor.redColor()
-        bot1Geometry.materials = [bot1Material]
-        let bot1 = SCNNode(geometry: bot1Geometry)
-        bot1.position = SCNVector3(x: -25, y: 10, z: -40)
-        let bot1Shape = SCNPhysicsShape(geometry: bot1Geometry, options: nil)
-        bot1.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: bot1Shape)
-        bot1.categoryBitMask = ColliderType.Bot1
-        bot1.physicsBody!.categoryBitMask = ColliderType.Bot1
-        bot1.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground | ColliderType.Weapon
-        
-        let bot2Geometry = SCNBox(width: 15, height: 15, length: 15, chamferRadius: 1)
-        let bot2Material = SCNMaterial()
-        bot2Material.diffuse.contents = NSColor.greenColor()
-        bot2Geometry.materials = [bot2Material]
-        let bot2 = SCNNode(geometry: bot2Geometry)
-        bot2.position = SCNVector3(x: 25, y: 10, z: 60)
-        let bot2Shape = SCNPhysicsShape(geometry: bot2Geometry, options: nil)
-        bot2.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: bot2Shape)
-        bot2.physicsBody!.categoryBitMask = ColliderType.Bot2
-        bot2.physicsBody!.collisionBitMask = ColliderType.Player | ColliderType.Ground | ColliderType.Weapon
+        // create enemy
+        let enemy = EnemyFactory.createCombatAndroid(SCNVector3Make(-25, 0, -40))
+        sceneView.scene?.rootNode.addChildNode(enemy)
         
         // create and add a camera to the scene
         self.camera = Camera()
@@ -145,19 +125,8 @@ class GameViewController: NSViewController {
         sprite.addChildNode(self.camera)
         
         // create weapon
-        let weaponScene = SCNScene(named: "art.scnassets/Handgun.dae")
-        let nodeArray = weaponScene!.rootNode.childNodes
-        
-        for childNode in nodeArray {
-            weapon = childNode
-            weapon.position = SCNVector3Make(1, -3, -3)
-            let weaponGeometry = SCNBox(width: 5, height: 5, length: 5, chamferRadius: 1)
-            let weaponShape = SCNPhysicsShape(geometry: weaponGeometry, options: nil)
-            weapon.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: weaponShape)
-            weapon.physicsBody?.categoryBitMask = ColliderType.Weapon
-            weapon.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Bot1 | ColliderType.Bot2
-            camera.addChildNode(weapon)
-        }
+        weapon = WeaponFactory.createHandgun()
+        camera.addChildNode(weapon)
         
         // add lighting
         let ambientLight = SCNLight()
@@ -178,8 +147,6 @@ class GameViewController: NSViewController {
         sceneView.scene?.rootNode.addChildNode(light)
         sceneView.scene?.rootNode.addChildNode(ground)
         sceneView.scene?.rootNode.addChildNode(sprite)
-        sceneView.scene?.rootNode.addChildNode(bot1)
-        sceneView.scene?.rootNode.addChildNode(bot2)
         
         sceneView.showsStatistics = true
         
@@ -290,45 +257,28 @@ class GameViewController: NSViewController {
                 }
             }
         case .Button:
-            print("it was a button event")
-            
             switch strokeInfo.button! {
             case .Crouch:
                 print("the button event was crouch")
             case .Attack:
-                print ("the button event was attack")
-                
                 // Create a vector based on the bullet direction
                 
-                // First get camera position. This is the bullet starting point
-                bulletStart = self.camera.presentationNode.position
+                // First get gunBarrel position. This is the bullet starting point
+                let gunBarrel = self.weapon.childNodeWithName("gunBarrel", recursively: true)
                 
-                // Then get the sprite facing direction. This will have the correct x and z values
-                // Already normalized
-                let forwardDirection = self.forwardMovementDirectionVector()
-                
-                // Use tan(ø) = opp/adj
-                var crosshairY: CGFloat!
-                // Now calculate the y value
-                if camera.rotation.x > 0 {
-                    //crosshair pointing up
-                    print("crosshair pointing up")
-                    print("cameraRotation: \(camera.rotation.x)")
-                    crosshairY = tan(camera.rotation.x)
+                if let barrel = gunBarrel {
+                    // add shooting animation
                     
-                } else {
-                    // crosshair pointing down
-                    print("crosshair pointing down")
-                    print("cameraRotation: \(camera.rotation.x)")
-                    crosshairY = tan(camera.rotation.x)
-                    crosshairY = -crosshairY
                 }
-                //let yCrosshairPosition = camera.presentationNode.position.y+crosshairY
-                //shootingDirectionVector = getNormalizedVector(SCNVector3Make(forwardDirection.x-bulletStart.x, yCrosshairPosition-bulletStart.y, forwardDirection.z-bulletStart.z))
                 
-                bulletStart!.y += crosshairY
-                print("bulletStartY: \(bulletStart)")
-                shootingDirectionVector = getNormalizedVector(SCNVector3Make(forwardDirection.x-bulletStart!.x, 0, forwardDirection.z-bulletStart!.z))
+                // first get camera position in terms of the scene
+                let cameraPositionInRoot = sceneView.scene?.rootNode.convertPosition(camera.presentationNode.position, fromNode: sprite)
+                
+                let cameraFacingRootCoordinates = sceneView.scene?.rootNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: camera)
+                
+                let cameraFacingDirectionVector = SCNVector3Make(cameraFacingRootCoordinates!.x-cameraPositionInRoot!.x, (cameraFacingRootCoordinates!.y-cameraPositionInRoot!.y)*2, cameraFacingRootCoordinates!.z-cameraPositionInRoot!.z)
+
+                shootingDirectionVector = getNormalizedVector(cameraFacingDirectionVector)
                 
                 fired = true
                 
@@ -405,8 +355,6 @@ class GameViewController: NSViewController {
         
         // Set sprite transform
         sprite.transform = spriteTransform
-        
-        // Set camera transform
         camera.transform = SCNMatrix4Mult(oldVerticalRotation!, verticalRotation!)
         
         oldHorizontalRotation = sprite.transform
@@ -416,23 +364,21 @@ class GameViewController: NSViewController {
     func updateCrosshairAim(){
         
         if fired == true {
-        print("bulletStart: \(bulletStart)")
-        print("shootingDirectionVector: \(shootingDirectionVector)")
-        
         let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
         let bulletMaterial = SCNMaterial()
         bulletMaterial.diffuse.contents = NSColor.orangeColor()
         bulletGeometry.materials = [bulletMaterial]
-        let bullet = SCNNode(geometry: bulletGeometry)
-        bullet.position = bulletStart!
-        bullet.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
-        bullet.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
-        sceneView.scene?.rootNode.addChildNode(bullet)
+        bullet = SCNNode(geometry: bulletGeometry)
+        bullet!.position = sceneView.scene!.rootNode.convertPosition(camera.presentationNode.position, fromNode: sprite)
+        bullet!.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
+        bullet!.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
+        bullet!.physicsBody?.categoryBitMask = ColliderType.Bullet
+        bullet!.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Player | ColliderType.Ground
+        sceneView.scene?.rootNode.addChildNode(bullet!)
             
-        let impulse = SCNVector3Make(shootingDirectionVector!.x*100, shootingDirectionVector!.y*100, shootingDirectionVector!.z*100)
-        print("impulse: \(impulse)")
+        let impulse = SCNVector3Make(shootingDirectionVector!.x*1000, shootingDirectionVector!.y*1000, shootingDirectionVector!.z*1000)
         
-        bullet.physicsBody?.applyForce(impulse, impulse: true)
+        bullet!.physicsBody?.applyForce(impulse, impulse: true)
         
         fired = false
         }
@@ -461,20 +407,28 @@ extension GameViewController : SCNSceneRendererDelegate {
 extension GameViewController : SCNPhysicsContactDelegate {
     func physicsWorld(world: SCNPhysicsWorld, didBeginContact contact: SCNPhysicsContact) {
         
-        var firstBody: SCNNode
-        var secondBody: SCNNode
+        let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
         
-        if contact.nodeA.categoryBitMask < contact.nodeB.categoryBitMask {
-            firstBody = contact.nodeA
-            secondBody = contact.nodeB
-        } else {
-            firstBody = contact.nodeB
-            secondBody = contact.nodeA
+        switch contactMask {
+        case ColliderType.Player | ColliderType.Enemy:
+            print("collision between player and enemy")
+        case ColliderType.Player | ColliderType.Bullet:
+            print("collision between player and bullet")
+            
+            // calculate the damage to the player
+            
+        case ColliderType.Weapon | ColliderType.Enemy:
+            print("collision between weapon and enemy")
+        case ColliderType.Bullet | ColliderType.Enemy:
+            print("collision between bullet and enemy")
+            
+            // calculate the damage to the enemy
+            
+        case ColliderType.Bullet | ColliderType.Ground:
+            bullet?.removeFromParentNode()
+        default: break
         }
         
-        if ((firstBody.categoryBitMask & ColliderType.Player) != 0) && ((secondBody.categoryBitMask & ColliderType.Bot1) != 0) {
-            print("collision was between player and bot1")
-        }
     }
     
     func physicsWorld(world: SCNPhysicsWorld, didEndContact contact: SCNPhysicsContact) {

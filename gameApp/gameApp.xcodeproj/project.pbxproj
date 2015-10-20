@@ -21,6 +21,10 @@
 		9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */; settings = {ASSET_TAGS = (); }; };
+		9EB5ACDA1BD69F3700332B59 /* Weapon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACD91BD69F3700332B59 /* Weapon.swift */; settings = {ASSET_TAGS = (); }; };
+		9EB5ACDC1BD6BAC100332B59 /* WeaponFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */; settings = {ASSET_TAGS = (); }; };
+		9EB5ACDE1BD6BE2400332B59 /* EnemyFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */; settings = {ASSET_TAGS = (); }; };
+		9EB5ACE01BD6BE3900332B59 /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +65,10 @@
 		9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairSingleDeviceViewController.swift; sourceTree = "<group>"; };
 		9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GameViewController.xib; sourceTree = "<group>"; };
+		9EB5ACD91BD69F3700332B59 /* Weapon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weapon.swift; sourceTree = "<group>"; };
+		9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeaponFactory.swift; sourceTree = "<group>"; };
+		9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnemyFactory.swift; sourceTree = "<group>"; };
+		9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +127,10 @@
 				9E205A021BCB73A100A66DC2 /* HUD.swift */,
 				9E205A001BCAFA1000A66DC2 /* Camera.swift */,
 				9E2059FE1BCAF6A200A66DC2 /* Player.swift */,
+				9EB5ACD91BD69F3700332B59 /* Weapon.swift */,
+				9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */,
+				9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */,
+				9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
@@ -282,14 +294,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EB5ACDC1BD6BAC100332B59 /* WeaponFactory.swift in Sources */,
 				9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */,
+				9EB5ACDE1BD6BE2400332B59 /* EnemyFactory.swift in Sources */,
 				9E230F101BB07F100046CC4E /* GameView.swift in Sources */,
 				9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */,
 				9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */,
 				9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */,
 				9E205A031BCB73A100A66DC2 /* HUD.swift in Sources */,
+				9EB5ACE01BD6BE3900332B59 /* Enemy.swift in Sources */,
 				9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */,
 				9E230F3D1BB07F500046CC4E /* ServiceManager.swift in Sources */,
+				9EB5ACDA1BD69F3700332B59 /* Weapon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,7 +15,10 @@ class Player: SCNNode {
     let height: CGFloat = 12
     let length: CGFloat = 2
     let speed: CGFloat = 0.3
-    let jumpHeight: CGFloat = 6
+    let jumpHeight: CGFloat = 10
+    let health: CGFloat = 100
+    let damage: CGFloat = 5
+    var equippedWeapon: Weapon?
     
     override init() {
         // Initialize player
@@ -31,7 +34,7 @@ class Player: SCNNode {
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
-        self.physicsBody?.collisionBitMask = ColliderType.Bot1 | ColliderType.Bot2 | ColliderType.Ground
+        self.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Ground
         self.physicsBody?.friction = 0.7
     }
     
