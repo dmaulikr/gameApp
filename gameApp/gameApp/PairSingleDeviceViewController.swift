@@ -10,13 +10,14 @@ import Cocoa
 
 class PairSingleDeviceViewController: NSViewController {
 
-    @IBOutlet var codeLabel: NSTextField!
     @IBOutlet var pairDeviceView: NSView!
+    @IBOutlet var playerLabel: NSTextField!
+    @IBOutlet var acceptButton: NSButton!
     
     var serviceManager: ServiceManager?
     var gameViewController: GameViewController?
     
-    private let addAccessibilityCodeNK = "elg-addAccessibilityCode"
+    private let kAddPeerInviteNK = "elg-addPeerInvite"
     private let switchToGameViewNK = "elg-switchToGameView"
     
     override func viewDidLoad() {
@@ -28,15 +29,14 @@ class PairSingleDeviceViewController: NSViewController {
         self.view.addSubview(pairDeviceView)
         
         // Do view setup here.
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "addAccessibilityCode:", name: addAccessibilityCodeNK, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "addPeerInvite:", name: kAddPeerInviteNK, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "switchToGameView", name: switchToGameViewNK, object: nil)
         serviceManager = ServiceManager()
     }
     
-    func addAccessibilityCode(notification: NSNotification) {
+    func addPeerInvite(notification: NSNotification) {
         let userInfo:Dictionary<String,String!> = notification.userInfo as! Dictionary<String,String!>
-        let accessibilityCode = userInfo["accessibilityCode"]
-        codeLabel.stringValue = accessibilityCode!
+        let peerId = userInfo["peerId"]
     }
     
     func switchToGameView() {

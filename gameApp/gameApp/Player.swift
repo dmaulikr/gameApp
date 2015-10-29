@@ -14,7 +14,7 @@ class Player: SCNNode {
     let width: CGFloat = 5
     let height: CGFloat = 12
     let length: CGFloat = 2
-    let speed: CGFloat = 0.3
+    let speed: CGFloat = 0.5
     let jumpHeight: CGFloat = 10
     let health: CGFloat = 100
     let damage: CGFloat = 5
@@ -24,13 +24,14 @@ class Player: SCNNode {
         // Initialize player
         super.init()
         let geometry = SCNBox(width: self.width, height: self.height, length: self.length, chamferRadius: 0)
+        let geo = SCNCapsule(capRadius: self.width, height: self.height)
         let material = SCNMaterial()
         material.diffuse.contents = NSColor.blueColor()
         geometry.materials = [material]
         self.geometry = geometry
         
         // Set player physics
-        let bodyShape = SCNPhysicsShape(geometry: geometry, options: nil)
+        let bodyShape = SCNPhysicsShape(geometry: geo, options: nil)
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player

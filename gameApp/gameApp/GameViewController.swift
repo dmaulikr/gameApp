@@ -62,6 +62,7 @@ class GameViewController: NSViewController {
     var sceneView: SCNView!
     var hud: HUD!
     var sprite: Player!
+    var enemy: Enemy!
     var camera: Camera!
     var weapon: Weapon!
     var ground: SCNNode!
@@ -84,10 +85,27 @@ class GameViewController: NSViewController {
         // create a new scene
         sceneView = SCNView(frame: self.view.frame)
         sceneView.scene = SCNScene()
+        //sceneView.scene = SCNScene(named: "art.scnassets/level.scn")
         sceneView.scene?.physicsWorld.contactDelegate = self
         sceneView.playing = true
         sceneView.delegate = self
         
+        let islandScene = SCNScene(named: "art.scnassets/Small Tropical Island/Untitled.dae")
+        let nodeArray = islandScene!.rootNode.childNodes
+        
+        let islandNode = SCNNode()
+        islandNode.position = SCNVector3Make(0, 0, -450)
+        
+        for childNode in nodeArray {
+            
+            // Add model as child node
+            islandNode.addChildNode(childNode)
+        }
+        let shape = SCNPhysicsShape(node: islandNode, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
+        islandNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
+        islandNode.physicsBody?.categoryBitMask = ColliderType.Ground
+        islandNode.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Enemy | ColliderType.Player
+        sceneView.scene?.rootNode.addChildNode(islandNode)
         
         // Needs to be initialized in main queue
         dispatch_async(dispatch_get_main_queue(), {
@@ -102,22 +120,20 @@ class GameViewController: NSViewController {
         // create ground
         let groundGeometry = SCNFloor()
         groundGeometry.reflectivity = 0
-        let groundMaterial = SCNMaterial()
-        groundMaterial.diffuse.contents = NSImage(named: "art.scnassets/grass.jpg")
-        groundGeometry.materials = [groundMaterial]
+        //let groundMaterial = SCNMaterial()
+        //groundMaterial.diffuse.contents = NSColor.lightGrayColor()
+        groundGeometry.firstMaterial!.diffuse.contents = "art.scnassets/Grass_1.png"
+        groundGeometry.firstMaterial!.locksAmbientWithDiffuse = true
+        //groundGeometry.materials = [groundMaterial]
         ground = SCNNode(geometry: groundGeometry)
         let groundShape = SCNPhysicsShape(geometry: groundGeometry, options: nil)
         ground.physicsBody = SCNPhysicsBody(type: .Static, shape: groundShape)
-        ground.categoryBitMask = ColliderType.Ground
         ground.physicsBody?.categoryBitMask = ColliderType.Ground
+        
         
         // create character
         sprite = Player()
         sprite.position = SCNVector3Make(0, 0, 0)
-        
-        // create enemy
-        let enemy = EnemyFactory.createCombatAndroid(SCNVector3Make(-25, 0, -40))
-        sceneView.scene?.rootNode.addChildNode(enemy)
         
         // create and add a camera to the scene
         self.camera = Camera()
@@ -127,6 +143,11 @@ class GameViewController: NSViewController {
         // create weapon
         weapon = WeaponFactory.createHandgun()
         camera.addChildNode(weapon)
+        sprite.equippedWeapon = weapon
+    
+        // create enemy
+        enemy = EnemyFactory.createCombatAndroid(SCNVector3Make(-25, 0, -40))
+        sceneView.scene?.rootNode.addChildNode(enemy)
         
         // add lighting
         let ambientLight = SCNLight()
@@ -235,8 +256,8 @@ class GameViewController: NSViewController {
                         let normalizedVector = CGVectorMake(panVector.dx/CGFloat(vectorMagnitude), panVector.dy/CGFloat(vectorMagnitude))
                         
                         // Generate angles based on the normalized vector
-                        let horizontalAngle = acos(normalizedVector.dx / 55) - CGFloat(M_PI_2)
-                        let verticalAngle = acos(normalizedVector.dy / 55) - CGFloat(M_PI_2)
+                        let horizontalAngle = acos(normalizedVector.dx / 70) - CGFloat(M_PI_2)
+                        let verticalAngle = acos(normalizedVector.dy / 70) - CGFloat(M_PI_2)
                         
                         // Create a matrix that represents the horizontal rotation
                         horizontalRotation = SCNMatrix4MakeRotation(CGFloat(horizontalAngle), 0, 1, 0)
@@ -261,15 +282,6 @@ class GameViewController: NSViewController {
             case .Crouch:
                 print("the button event was crouch")
             case .Attack:
-                // Create a vector based on the bullet direction
-                
-                // First get gunBarrel position. This is the bullet starting point
-                let gunBarrel = self.weapon.childNodeWithName("gunBarrel", recursively: true)
-                
-                if let barrel = gunBarrel {
-                    // add shooting animation
-                    
-                }
                 
                 // first get camera position in terms of the scene
                 let cameraPositionInRoot = sceneView.scene?.rootNode.convertPosition(camera.presentationNode.position, fromNode: sprite)
@@ -376,7 +388,7 @@ class GameViewController: NSViewController {
         bullet!.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Player | ColliderType.Ground
         sceneView.scene?.rootNode.addChildNode(bullet!)
             
-        let impulse = SCNVector3Make(shootingDirectionVector!.x*1000, shootingDirectionVector!.y*1000, shootingDirectionVector!.z*1000)
+        let impulse = SCNVector3Make(shootingDirectionVector!.x*300, shootingDirectionVector!.y*300, shootingDirectionVector!.z*300)
         
         bullet!.physicsBody?.applyForce(impulse, impulse: true)
         
@@ -420,7 +432,11 @@ extension GameViewController : SCNPhysicsContactDelegate {
         case ColliderType.Weapon | ColliderType.Enemy:
             print("collision between weapon and enemy")
         case ColliderType.Bullet | ColliderType.Enemy:
+            bullet?.removeFromParentNode()
             print("collision between bullet and enemy")
+            print("old enemy life: \(enemy.health)")
+            enemy.health! -= sprite.equippedWeapon!.baseDamage!
+            print("new enemy life: \(enemy.health)")
             
             // calculate the damage to the enemy
             

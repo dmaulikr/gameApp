@@ -13,7 +13,7 @@ class ServiceManager : NSObject {
     
     // Service type must be a unique string, at most 15 characters long
     private let GameServiceType = "elg-escape-game"
-    private let addAccessibilityCodeNK = "elg-addAccessibilityCode"
+    private let kAddPeerInviteNK = "elg-addPeerInvite"
     private let switchToGameViewNK = "elg-switchToGameView"
     let kPlayerControlsNK = "elg-playerControls"
     let kPeerIDKey = "elg-peerid"
@@ -44,12 +44,8 @@ class ServiceManager : NSObject {
         
         self.serviceAdvertiser.delegate = self
         self.serviceAdvertiser.startAdvertisingPeer()
-        self.player1Code = randomizedConnectionCode()
         print("Starting advertising peer...")
         
-        NSNotificationCenter.defaultCenter().postNotificationName(addAccessibilityCodeNK, object: self, userInfo: ["accessibilityCode": self.player1Code!])
-        
-        print("Randomized connection code: \(player1Code)")
     }
     
     deinit {
@@ -63,24 +59,6 @@ class ServiceManager : NSObject {
         return session
         }()
     
-    func randomizedConnectionCode() -> String {
-        let randomInt: Int = Int(arc4random_uniform(10_000))
-        var randomIntString = String(randomInt)
-        
-        if randomInt <= 9 {
-            randomIntString = ("000\(randomIntString)")
-            return randomIntString
-        } else if randomInt <= 99 {
-            randomIntString = ("00\(randomIntString)")
-            return randomIntString
-        } else if randomInt <= 999 {
-            randomIntString = ("0\(randomIntString)")
-            return randomIntString
-        } else {
-            return String(randomInt)
-        }
-    }
-    
 }
 
 extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
@@ -91,17 +69,9 @@ extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
     func advertiser(advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: NSData?, invitationHandler: (Bool, MCSession) -> Void) {
         print("didReceiveInvitationFromPeer: \(peerID)")
         
-        // Here check if the code sent matches
-        // if it does, accept the invitation
-        let codeSent = NSString(data: context!, encoding: NSUTF8StringEncoding)
+             //NSNotificationCenter.defaultCenter().postNotificationName(kAddPeerInviteNK, object: self, userInfo: ["peerId": peerID.displayName])
         
-        if codeSent == player1Code {
-            print("Correct code!")
             invitationHandler(true, self.session)
-        } else {
-            print("Incorrect code sent")
-            invitationHandler(false, self.session)
-        }
     }
 }
 

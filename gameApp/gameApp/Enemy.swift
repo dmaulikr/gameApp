@@ -11,14 +11,11 @@ import SceneKit
 
 class Enemy: SCNNode {
     
-    var health: CGFloat?
-    var damage: CGFloat?
+    var health: CGFloat!
+    var damage: CGFloat!
     
     override init() {
         super.init()
-        
-        self.physicsBody?.categoryBitMask = ColliderType.Enemy
-        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy | ColliderType.Bullet
     }
     
     required init?(coder: NSCoder) {
