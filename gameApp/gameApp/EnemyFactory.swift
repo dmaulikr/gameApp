@@ -11,10 +11,14 @@ import SceneKit
 
 class EnemyFactory: NSObject {
     
-    static func createCombatAndroid(position: SCNVector3) -> Enemy {
+    static func createCombatAndroid(position: SCNVector3, target: Player, levelNode: SCNNode) -> Enemy {
         let android = Enemy()
         android.health = 100
         android.damage = 20
+        android.speed = 0.3
+        android.viewDistance = 50
+        android.target = target
+        android.levelNode = levelNode
         
         android.position = position
         

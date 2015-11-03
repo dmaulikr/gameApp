@@ -99,7 +99,7 @@ class GameSimulation: SCNScene {
             case .Camera:
                 switch strokeInfo.gestureType! {
                 case .Tap:
-                    gameLevel.playerJump()
+                    gameLevel.player.jump()
                 case .Pan:
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
@@ -131,8 +131,10 @@ extension GameSimulation : SCNSceneRendererDelegate {
     }
     
     func renderer(renderer: SCNSceneRenderer, updateAtTime time: NSTimeInterval) {
-        gameLevel.updateSpriteTransform()
+        gameLevel.updatePlayerTransform()
         gameLevel.updateCrosshairAim()
+        gameLevel.updateEnemy()
+        
     }
     
     func renderer(renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: NSTimeInterval) {

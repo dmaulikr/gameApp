@@ -9,5 +9,16 @@
 import Cocoa
 
 class AIState<T>: NSObject {
-
+    
+    func enter (entity: T) {
+        
+    }
+    
+    func execute (entity: T) {
+        
+    }
+    
+    func exit(entity: T) {
+        
+    }
 }

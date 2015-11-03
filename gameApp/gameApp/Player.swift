@@ -20,6 +20,10 @@ class Player: SCNNode {
     let damage: CGFloat = 5
     var equippedWeapon: Weapon?
     
+    var oldHorizontalRotation: SCNMatrix4?
+    var horizontalRotation: SCNMatrix4?
+    var movementDirectionVector: SCNVector3?
+    
     override init() {
         // Initialize player
         super.init()
@@ -37,10 +41,26 @@ class Player: SCNNode {
         self.physicsBody?.categoryBitMask = ColliderType.Player
         self.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Ground
         self.physicsBody?.friction = 0.7
+        
+        horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
+        oldHorizontalRotation = self.transform
+        movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+    
+    func calculateMovementTransform() {
+        
+    }
+    
+    func updateMovementTransform() {
+        
+    }
+    
+    func jump() {
+        self.physicsBody?.applyForce(SCNVector3Make(0, self.jumpHeight, 0), impulse: true)
     }
     
 }
