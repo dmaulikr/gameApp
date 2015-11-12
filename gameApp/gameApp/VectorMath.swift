@@ -49,4 +49,8 @@ class VectorMath: NSObject {
         return left.x*right.x+left.y*right.y+left.z*right.z
     }
     
+    static func crossProduct(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
+        return SCNVector3Make(left.y*right.z-left.z*right.y, left.z*right.x-left.x*right.z, left.x*right.y-left.y*right.x)
+    }
+    
 }

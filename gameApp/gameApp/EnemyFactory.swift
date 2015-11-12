@@ -15,7 +15,8 @@ class EnemyFactory: NSObject {
         let android = Enemy()
         android.health = 100
         android.damage = 20
-        android.speed = 0.3
+        android.speed = 0.4
+        android.panicDistance = 20
         android.viewDistance = 50
         android.target = target
         android.levelNode = levelNode
@@ -35,9 +36,11 @@ class EnemyFactory: NSObject {
             android.addChildNode(childNode)
         }
         let shape = SCNPhysicsShape(node: android, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
-        android.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
+        //android.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
+        android.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
         android.physicsBody?.categoryBitMask = ColliderType.Enemy
-        android.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Ground
+        android.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall
+        android.physicsBody?.contactTestBitMask = ColliderType.Bullet | ColliderType.Player 
         return android
     }
 }

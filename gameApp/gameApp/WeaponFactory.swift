@@ -38,7 +38,7 @@ class WeaponFactory: NSObject {
             // Set physics
             handgun.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
             handgun.physicsBody?.categoryBitMask = ColliderType.Weapon
-            handgun.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy
+            handgun.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy | ColliderType.Wall
             
             // Add model as child node
             handgun.addChildNode(childNode)

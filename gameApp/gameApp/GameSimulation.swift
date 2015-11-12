@@ -15,6 +15,7 @@ struct ColliderType {
     static let Ground = 0x1 << 2
     static let Weapon = 0x1 << 3
     static let Bullet = 0x1 << 4
+    static let Wall = 0x1 << 5
 }
 
 struct Keystroke {
@@ -61,11 +62,9 @@ class GameSimulation: SCNScene {
         super.init()
         
         self.physicsWorld.contactDelegate = self
-        
         self.gameLevel = GameLevel()
-        let levelNode: SCNNode = gameLevel.createLevel()
+        let levelNode: SCNNode = gameLevel.createLevel(self)
         self.rootNode.addChildNode(levelNode)
-        
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: kPlayerControlsNK, object: nil)
         
     }
@@ -90,8 +89,10 @@ class GameSimulation: SCNScene {
                 switch strokeInfo.gestureType! {
                 case .Pan:
                     if strokeInfo.panTranslation != nil {
+                        //print("Movement pan is not nil")
                         gameLevel.calculatePlayerMovementTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
                     } else {
+                        //print("Game Sim: player not moving")
                         gameLevel.playerNotMoving()
                     }
                 default: break
@@ -103,9 +104,11 @@ class GameSimulation: SCNScene {
                 case .Pan:
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
+                        //print("Camera pan is not nil")
                        gameLevel.calculateCameraRotationTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
                     } else {
                         // No rotations must happen anymore
+                        //print("Game Sim: camera not panning")
                         gameLevel.cameraNotRotating()
                     }
                 }
@@ -147,6 +150,7 @@ extension GameSimulation : SCNSceneRendererDelegate {
 }
 
 extension GameSimulation : SCNPhysicsContactDelegate {
+    
     func physicsWorld(world: SCNPhysicsWorld, didBeginContact contact: SCNPhysicsContact) {
         
         let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
@@ -162,10 +166,27 @@ extension GameSimulation : SCNPhysicsContactDelegate {
         case ColliderType.Weapon | ColliderType.Enemy:
             print("collision between weapon and enemy")
         case ColliderType.Bullet | ColliderType.Enemy:
-            print("collision between bullet and enemy")
-            
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Bullet {
+               let bullet = contact.nodeA
+                if bullet.parentNode != nil {
+                    gameLevel.subtractEnemyHealth()
+                }
+                bullet.geometry?.firstMaterial?.normal.contents = nil
+                bullet.geometry?.firstMaterial?.diffuse.contents = nil
+                bullet.removeFromParentNode()
+            } else {
+                let bullet = contact.nodeB
+                if bullet.parentNode != nil {
+                    gameLevel.subtractEnemyHealth()
+                }
+                bullet.geometry?.firstMaterial?.normal.contents = nil
+                bullet.geometry?.firstMaterial?.diffuse.contents = nil
+                bullet.removeFromParentNode()
+            }
         case ColliderType.Bullet | ColliderType.Ground:
-            print("collision between bullet and ground")
+            break
+            case ColliderType.Ground | ColliderType.Enemy:
+            print("collision between ground and enemy")
         default: break
         }
         

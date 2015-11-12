@@ -39,7 +39,7 @@ class Player: SCNNode {
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
-        self.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Ground
+        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy | ColliderType.Wall
         self.physicsBody?.friction = 0.7
         
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)

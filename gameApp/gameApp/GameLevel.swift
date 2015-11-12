@@ -17,7 +17,9 @@ class GameLevel: NSObject {
     var ground: SCNNode!
     var light: SCNNode!
     var bullet: SCNNode?
+    var bulletArray: Array<SCNNode>!
     var levelNode: SCNNode!
+    var bulletAudioSource: SCNAudioSource!
     
     var movementDirectionVector: SCNVector3?
     var shootingDirectionVector: SCNVector3?
@@ -36,38 +38,52 @@ class GameLevel: NSObject {
         
     }
     
-    func createLevel() -> SCNNode {
+    func createLevel(parentScene: SCNScene) -> SCNNode {
+        
+        parentScene.background.contents = "art.scnassets/skybox01_cube.png"
         
         levelNode = SCNNode()
         
-        let islandScene = SCNScene(named: "art.scnassets/Small Tropical Island/Untitled.dae")
-        let nodeArray = islandScene!.rootNode.childNodes
+//        let islandScene = SCNScene(named: "art.scnassets/Small Tropical Island/Untitled.dae")
+//        let nodeArray = islandScene!.rootNode.childNodes
+//        
+//        let islandNode = SCNNode()
+//        islandNode.position = SCNVector3Make(0, 0, -450)
+//        
+//        for childNode in nodeArray {
+//            
+//            // Add model as child node
+//            islandNode.addChildNode(childNode)
+//        }
+//        let shape = SCNPhysicsShape(node: islandNode, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
+//        islandNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
+//        islandNode.physicsBody?.categoryBitMask = ColliderType.Ground
+//        islandNode.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Enemy | ColliderType.Player
+//        levelNode.addChildNode(islandNode)
         
-        let islandNode = SCNNode()
-        islandNode.position = SCNVector3Make(0, 0, -450)
+        let levelScene = SCNScene(named: "art.scnassets/level.scn")
+        let nodeArray = levelScene!.rootNode.childNodes
         
         for childNode in nodeArray {
             
             // Add model as child node
-            islandNode.addChildNode(childNode)
+            //childNode.physicsBody?.categoryBitMask = ColliderType.Ground
+            //childNode.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Player
+            levelNode.addChildNode(childNode)
         }
-        let shape = SCNPhysicsShape(node: islandNode, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
-        islandNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
-        islandNode.physicsBody?.categoryBitMask = ColliderType.Ground
-        islandNode.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Enemy | ColliderType.Player
-        levelNode.addChildNode(islandNode)
-        
         
         // create ground
-        let groundGeometry = SCNFloor()
-        groundGeometry.reflectivity = 0
-        groundGeometry.firstMaterial!.diffuse.contents = "art.scnassets/Grass_1.png"
-        groundGeometry.firstMaterial!.locksAmbientWithDiffuse = true
-        ground = SCNNode(geometry: groundGeometry)
-        let groundShape = SCNPhysicsShape(geometry: groundGeometry, options: nil)
-        ground.physicsBody = SCNPhysicsBody(type: .Static, shape: groundShape)
-        ground.physicsBody?.categoryBitMask = ColliderType.Ground
-        levelNode.addChildNode(ground)
+//        let groundGeometry = SCNFloor()
+//        groundGeometry.reflectivity = 0
+//        groundGeometry.firstMaterial!.diffuse.contents = "art.scnassets/Grass_1.png"
+//        //groundGeometry.firstMaterial!.locksAmbientWithDiffuse = true
+//        groundGeometry.firstMaterial!.shininess = 0.2
+//        ground = SCNNode(geometry: groundGeometry)
+//        let groundShape = SCNPhysicsShape(geometry: groundGeometry, options: nil)
+//        ground.physicsBody = SCNPhysicsBody(type: .Static, shape: groundShape)
+//        ground.physicsBody?.categoryBitMask = ColliderType.Ground
+//        ground.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy
+//        levelNode.addChildNode(ground)
         
         // create character
         player = Player()
@@ -115,6 +131,8 @@ class GameLevel: NSObject {
         oldVerticalRotation = self.camera.transform
         
         fired = false
+        bulletArray = [SCNNode]()
+        bulletAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/gunshot.mp3")!
         
         return levelNode
     }
@@ -122,7 +140,7 @@ class GameLevel: NSObject {
     func playerAttack() {
         let cameraPositionInRoot = self.levelNode.convertPosition(self.camera.presentationNode.position, fromNode: self.player)
         
-        let cameraFacingRootCoordinates = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: self.camera)
+        let cameraFacingRootCoordinates = self.getNodeHeadingInWorldSpace(self.camera)
         
         let cameraFacingDirectionVector = SCNVector3Make(cameraFacingRootCoordinates.x-cameraPositionInRoot.x, (cameraFacingRootCoordinates.y-cameraPositionInRoot.y)*2, cameraFacingRootCoordinates.z-cameraPositionInRoot.z)
         
@@ -146,7 +164,7 @@ class GameLevel: NSObject {
         ************/
         
         // first check if the pan is even significant
-        if abs(panx) > 15 || abs(pany) > 15 {
+        if abs(panx) > 5 || abs(pany) > 5 {
             self.setMovementDirection(self.forwardMovementDirectionVector(), panx: panx, pany: pany)
         } else {
             // pan gesture not significant
@@ -161,9 +179,21 @@ class GameLevel: NSObject {
         // Normalize vector to make sure the speed of rotation stays constant
         let normalizedPanVector = VectorMath.getNormalizedVector(panVector)
         
+        let panVectorMag = VectorMath.getVectorMagnitude(panVector)
+        
+        let horizontalAngle: CGFloat
+        let verticalAngle: CGFloat
+        if panVectorMag > 50 {
         // Generate angles based on the normalized vector
-        let horizontalAngle = acos(normalizedPanVector.dx / 70) - CGFloat(M_PI_2)
-        let verticalAngle = acos(normalizedPanVector.dy / 70) - CGFloat(M_PI_2)
+            horizontalAngle = acos(normalizedPanVector.dx / 50) - CGFloat(M_PI_2)
+            verticalAngle = acos(normalizedPanVector.dy / 50) - CGFloat(M_PI_2)
+        } else if panVectorMag > 30{
+            horizontalAngle = acos(normalizedPanVector.dx / 85) - CGFloat(M_PI_2)
+            verticalAngle = acos(normalizedPanVector.dy / 85) - CGFloat(M_PI_2)
+        } else {
+            horizontalAngle = acos(normalizedPanVector.dx / 140) - CGFloat(M_PI_2)
+            verticalAngle = acos(normalizedPanVector.dy / 140) - CGFloat(M_PI_2)
+        }
         
         // Create a matrix that represents the horizontal rotation
         self.horizontalRotation = SCNMatrix4MakeRotation(CGFloat(horizontalAngle), 0, 1, 0)
@@ -188,7 +218,7 @@ class GameLevel: NSObject {
     
     func forwardMovementDirectionVector() -> SCNVector3 {
         // converts player's forward facing coordinate system into that of the sceneView rootNode
-        let forwardFacingSceneCoordinates = levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: player)
+        let forwardFacingSceneCoordinates = self.getNodeHeadingInWorldSpace(player) 
         
         // Get the forward movement direction vector
         let forwardMovementDirection = VectorMath.getDirectionVector(player.presentationNode.position, finishPoint: forwardFacingSceneCoordinates)
@@ -256,6 +286,8 @@ class GameLevel: NSObject {
     func updateCrosshairAim(){
         
         if fired == true {
+            let bulletSoundAction = SCNAction.playAudioSource(bulletAudioSource, waitForCompletion: true)
+            weapon.runAction(bulletSoundAction)
             let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
             let bulletMaterial = SCNMaterial()
             bulletMaterial.diffuse.contents = NSColor.orangeColor()
@@ -265,8 +297,12 @@ class GameLevel: NSObject {
             bullet!.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
             bullet!.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
             bullet!.physicsBody?.categoryBitMask = ColliderType.Bullet
-            bullet!.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Player | ColliderType.Ground
+            bullet!.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Ground
+            bullet!.physicsBody?.contactTestBitMask = ColliderType.Enemy | ColliderType.Player | ColliderType.Ground | ColliderType.Wall
+            bullet!.name = "bullet"
+            
             levelNode.addChildNode(bullet!)
+            bulletArray.append(bullet!)
             
             let impulse = VectorMath.multiplyVectorByScalar(shootingDirectionVector!, right: 300)
             
@@ -276,8 +312,23 @@ class GameLevel: NSObject {
         }
     }
     
+    func subtractEnemyHealth() {
+        if enemy.dead == false {
+        enemy.health = enemy.health - (weapon.baseDamage!+player.damage)
+        print("Enemy health: \(enemy.health)")
+            if enemy.health <= 0 {
+                print("Enemy dead")
+                enemy.dead = true
+            }
+        }
+    }
+    
     func updateEnemy() {
         enemy.update()
+    }
+    
+    func getNodeHeadingInWorldSpace(node: SCNNode) -> SCNVector3 {
+        return self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: node)
     }
 
     

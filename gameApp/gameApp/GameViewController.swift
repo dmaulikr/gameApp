@@ -26,15 +26,17 @@ class GameViewController: NSViewController {
         sceneView.scene = gameSim
         sceneView.playing = true
         sceneView.delegate = gameSim
+        sceneView.showsStatistics = true
         
         // Needs to be initialized in main queue
         dispatch_async(dispatch_get_main_queue(), {
-        // Add SKScene to function like a HUD
-        self.hud = HUD(size: self.sceneView.bounds.size)
-        self.sceneView.overlaySKScene = self.hud
+            // Add SKScene to function like a HUD
+            self.hud = HUD(size: self.sceneView.bounds.size)
+            self.sceneView.overlaySKScene = self.hud
+            self.view.addSubview(self.sceneView)
         })
         
-        self.view.addSubview(self.sceneView);
+        
     }
     
     required init?(coder: NSCoder) {

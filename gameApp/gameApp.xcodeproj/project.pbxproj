@@ -31,6 +31,7 @@
 		9EB5ACDC1BD6BAC100332B59 /* WeaponFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */; };
 		9EB5ACDE1BD6BE2400332B59 /* EnemyFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */; };
 		9EB5ACE01BD6BE3900332B59 /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */; };
+		9EBF2D1B1BF2816A0067AB6A /* level.scn in Resources */ = {isa = PBXBuildFile; fileRef = 9EBF2D1A1BF2816A0067AB6A /* level.scn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +82,7 @@
 		9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeaponFactory.swift; sourceTree = "<group>"; };
 		9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnemyFactory.swift; sourceTree = "<group>"; };
 		9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
+		9EBF2D1A1BF2816A0067AB6A /* level.scn */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; name = level.scn; path = art.scnassets/level.scn; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +151,7 @@
 				9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */,
 				9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */,
 				9EAFA0DD1BE84A4D00B77A13 /* VectorMath.swift */,
+				9EBF2D1A1BF2816A0067AB6A /* level.scn */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
@@ -287,6 +290,7 @@
 			files = (
 				9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */,
 				9E230F161BB07F100046CC4E /* Assets.xcassets in Resources */,
+				9EBF2D1B1BF2816A0067AB6A /* level.scn in Resources */,
 				9E230F141BB07F100046CC4E /* art.scnassets in Resources */,
 				9E230F191BB07F100046CC4E /* MainMenu.xib in Resources */,
 			);
@@ -464,6 +468,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = gameApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.girsova.gameApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -476,6 +481,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = gameApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.girsova.gameApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
