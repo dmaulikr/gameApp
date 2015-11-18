@@ -39,8 +39,44 @@ class EnemyFactory: NSObject {
         //android.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
         android.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
         android.physicsBody?.categoryBitMask = ColliderType.Enemy
-        android.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall
+        android.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall | ColliderType.Player
         android.physicsBody?.contactTestBitMask = ColliderType.Bullet | ColliderType.Player 
         return android
+    }
+    
+    static func createRobbieRabit(position: SCNVector3, target: Player, levelNode: SCNNode) -> Enemy {
+        let robbie = Enemy()
+        robbie.health = 100
+        robbie.damage = 20
+        robbie.speed = 0.4
+        robbie.panicDistance = 20
+        robbie.viewDistance = 50
+        robbie.target = target
+        robbie.levelNode = levelNode
+        
+        // Get model
+        let robbieScene = SCNScene(named: "art.scnassets/Robbie_the_Rabbit_rigged/Robbie_the_Rabbit_rigged copy.scn")
+        let nodeArray = robbieScene!.rootNode.childNodes
+        
+        for childNode in nodeArray {
+            // Add model as child node
+            childNode.physicsBody = nil
+            robbie.addChildNode(childNode)
+        }
+        
+        // Set textures"
+        robbie.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Robbie_the_Rabbit_rigged/Robbie_the_Rabbit_rigged_d.tga"
+        robbie.geometry?.firstMaterial?.specular.contents = "art.scnassets/Robbie_the_Rabbit_rigged/Robbie_the_Rabbit_rigged_s.tga"
+        robbie.geometry?.firstMaterial?.normal.contents = "art.scnassets/Robbie_the_Rabbit_rigged/Robbie_the_Rabbit_rigged_n.tga"
+        
+        //let shape = SCNPhysicsShape(node: robbie, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
+        robbie.position = position
+        robbie.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: nil)
+        robbie.physicsBody?.categoryBitMask = ColliderType.Enemy
+        robbie.physicsBody?.collisionBitMask =  ColliderType.Ground | ColliderType.Wall | ColliderType.Player | ColliderType.Weapon
+        robbie.physicsBody?.contactTestBitMask = ColliderType.Bullet
+        robbie.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
+        
+        return robbie
     }
 }

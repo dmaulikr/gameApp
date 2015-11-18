@@ -37,6 +37,11 @@ class VectorMath: NSObject {
         return SCNVector3Make(left.x*right.x, left.y*right.y, left.z*right.z)
     }
     
+    static func multiplyVectorByMatrix(left: SCNVector4, right: SCNMatrix4) -> SCNVector4 {
+        return SCNVector4Make(left.w*right.m11+left.x*right.m12+left.y*right.m13+left.z*right.m14, left.w*right.m21+left.x*right.m22+left.y*right.m23+left.z*right.m24, left.w*right.m31+left.x*right.m32+left.y*right.m33+left.z*right.m34, left.w*right.m41+left.x*right.m42+left.y*right.m43+left.z*right.m44)
+    }
+
+    
     static func addVectorToVector(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
         return SCNVector3Make(left.x+right.x, left.y+right.y, left.z+right.z)
     }

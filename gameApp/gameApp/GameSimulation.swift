@@ -10,12 +10,12 @@ import Cocoa
 import SceneKit
 
 struct ColliderType {
-    static let Player = 0x1 << 0
-    static let Enemy = 0x1 << 1
-    static let Ground = 0x1 << 2
-    static let Weapon = 0x1 << 3
-    static let Bullet = 0x1 << 4
-    static let Wall = 0x1 << 5
+    static let Player = 0x1 << 0 // 1
+    static let Enemy = 0x1 << 1 // 2
+    static let Ground = 0x1 << 2 // 4
+    static let Weapon = 0x1 << 3 // 8
+    static let Bullet = 0x1 << 4 // 16
+    static let Wall = 0x1 << 5 // 32
 }
 
 struct Keystroke {
@@ -166,6 +166,7 @@ extension GameSimulation : SCNPhysicsContactDelegate {
         case ColliderType.Weapon | ColliderType.Enemy:
             print("collision between weapon and enemy")
         case ColliderType.Bullet | ColliderType.Enemy:
+            print("collision between bullet and enemy")
             if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Bullet {
                let bullet = contact.nodeA
                 if bullet.parentNode != nil {
@@ -185,8 +186,18 @@ extension GameSimulation : SCNPhysicsContactDelegate {
             }
         case ColliderType.Bullet | ColliderType.Ground:
             break
-            case ColliderType.Ground | ColliderType.Enemy:
+        case ColliderType.Ground | ColliderType.Enemy:
             print("collision between ground and enemy")
+        case ColliderType.Ground | ColliderType.Player:
+            print("collision between ground and player")
+        case ColliderType.Wall | ColliderType.Enemy:
+            print("collision between wall and enemy")
+        case ColliderType.Wall | ColliderType.Player:
+            print("collision between wall and player")
+        case ColliderType.Wall | ColliderType.Weapon:
+            print("collision between wall and weapon")
+        case ColliderType.Wall | ColliderType.Bullet:
+            print("collision between wall and bullet")
         default: break
         }
         

@@ -12,6 +12,7 @@ import SceneKit
 class GameLevel: NSObject {
     var player: Player!
     var enemy: Enemy!
+    var enemy2: Enemy!
     var camera: Camera!
     var weapon: Weapon!
     var ground: SCNNode!
@@ -67,23 +68,23 @@ class GameLevel: NSObject {
         for childNode in nodeArray {
             
             // Add model as child node
-            //childNode.physicsBody?.categoryBitMask = ColliderType.Ground
-            //childNode.physicsBody?.collisionBitMask = ColliderType.Enemy | ColliderType.Player
+            if childNode.name == "floor" {
+                let floorGeometry = SCNFloor()
+                let shape = SCNPhysicsShape(geometry: floorGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
+                childNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
+                childNode.physicsBody?.categoryBitMask = ColliderType.Ground
+                childNode.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy
+            }
+            
+            if childNode.name == "wall" {
+                let wallGeometry = SCNBox(width: 100, height: 60, length: 15, chamferRadius: 1)
+                let shape = SCNPhysicsShape(geometry: wallGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
+                childNode.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
+                childNode.physicsBody?.categoryBitMask = ColliderType.Wall
+                childNode.physicsBody?.collisionBitMask = ColliderType.Weapon | ColliderType.Player | ColliderType.Enemy | ColliderType.Bullet
+            }
             levelNode.addChildNode(childNode)
         }
-        
-        // create ground
-//        let groundGeometry = SCNFloor()
-//        groundGeometry.reflectivity = 0
-//        groundGeometry.firstMaterial!.diffuse.contents = "art.scnassets/Grass_1.png"
-//        //groundGeometry.firstMaterial!.locksAmbientWithDiffuse = true
-//        groundGeometry.firstMaterial!.shininess = 0.2
-//        ground = SCNNode(geometry: groundGeometry)
-//        let groundShape = SCNPhysicsShape(geometry: groundGeometry, options: nil)
-//        ground.physicsBody = SCNPhysicsBody(type: .Static, shape: groundShape)
-//        ground.physicsBody?.categoryBitMask = ColliderType.Ground
-//        ground.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy
-//        levelNode.addChildNode(ground)
         
         // create character
         player = Player()
@@ -99,22 +100,25 @@ class GameLevel: NSObject {
         weapon = WeaponFactory.createHandgun()
         camera.addChildNode(weapon)
         player.equippedWeapon = weapon
-        
+            
         // create enemy
-        enemy = EnemyFactory.createCombatAndroid(SCNVector3Make(-25, 0, -40), target: player, levelNode: levelNode)
-        levelNode.addChildNode(enemy)
+//        enemy = EnemyFactory.createCombatAndroid(SCNVector3Make(-25, 0, -40), target: player, levelNode: levelNode)
+//        levelNode.addChildNode(enemy)
+        
+        enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), target: player, levelNode: levelNode)
+        levelNode.addChildNode(enemy2)
         
         // add lighting
-        let ambientLight = SCNLight()
-        ambientLight.color = NSColor.lightGrayColor()
-        ambientLight.type = SCNLightTypeAmbient
-        self.camera.light = ambientLight  // Add ambient lighting to the camera
+//        let ambientLight = SCNLight()
+//        ambientLight.color = NSColor.lightGrayColor()
+//        ambientLight.type = SCNLightTypeAmbient
+//        self.camera.light = ambientLight  // Add ambient lighting to the camera
         //levelNode.addChildNode(self.camera.light)
         
         let spotLight = SCNLight()
         spotLight.type = SCNLightTypeSpot
         spotLight.castsShadow = true
-        spotLight.zFar = 30
+        spotLight.zFar = 10
         light = SCNNode()
         light.light = spotLight
         light.position = SCNVector3(x: 0, y: 25, z: 25)
@@ -313,18 +317,28 @@ class GameLevel: NSObject {
     }
     
     func subtractEnemyHealth() {
-        if enemy.dead == false {
-        enemy.health = enemy.health - (weapon.baseDamage!+player.damage)
-        print("Enemy health: \(enemy.health)")
-            if enemy.health <= 0 {
+//        if enemy.dead == false {
+//        enemy.health = enemy.health - (weapon.baseDamage!+player.damage)
+//        print("Enemy health: \(enemy.health)")
+//            if enemy.health <= 0 {
+//                print("Enemy dead")
+//                enemy.dead = true
+//            }
+//        }
+        
+        if enemy2.dead == false {
+            enemy2.health = enemy2.health - (weapon.baseDamage!+player.damage)
+            print("Enemy health: \(enemy2.health)")
+            if enemy2.health <= 0 {
                 print("Enemy dead")
-                enemy.dead = true
+                enemy2.dead = true
             }
         }
     }
     
     func updateEnemy() {
-        enemy.update()
+        //enemy.update()
+        enemy2.update()
     }
     
     func getNodeHeadingInWorldSpace(node: SCNNode) -> SCNVector3 {

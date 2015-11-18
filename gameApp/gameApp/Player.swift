@@ -28,18 +28,17 @@ class Player: SCNNode {
         // Initialize player
         super.init()
         let geometry = SCNBox(width: self.width, height: self.height, length: self.length, chamferRadius: 0)
-        let geo = SCNCapsule(capRadius: self.width, height: self.height)
         let material = SCNMaterial()
         material.diffuse.contents = NSColor.blueColor()
         geometry.materials = [material]
         self.geometry = geometry
         
         // Set player physics
-        let bodyShape = SCNPhysicsShape(geometry: geo, options: nil)
+        let bodyShape = SCNPhysicsShape(geometry: geometry, options: nil)
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
-        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy | ColliderType.Wall
+        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy
         self.physicsBody?.friction = 0.7
         
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)

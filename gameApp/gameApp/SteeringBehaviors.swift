@@ -183,18 +183,26 @@ class SteeringBehaviors: NSObject {
         let circleDistance: CGFloat = 1
         
         // the maximum amount of random displacement that can be added to target each second
-        let wanderJitter: Float = Float(M_PI_4)/2
+        let wanderJitter: Float = Float(M_PI_4)
         
-        let forwardDirection = owner.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: owner.presentationNode)
+        // randomize starting vector?
         
+        let randXValue = Int(arc4random_uniform(3))-1
+        let randZValue = Int(arc4random_uniform(3))-1
+        
+        let randomStartVec = SCNVector3Make(CGFloat(randXValue), 0, CGFloat(randZValue))
+        //print("randomStartVec: \(randomStartVec)")
+        let forwardDirection = owner.levelNode.convertPosition(randomStartVec, fromNode: owner.presentationNode)
+        //print("forwardDirection: \(forwardDirection)")
         // First calculate the circle's position
         // It is always in front of the owner
         let circleCenter: SCNVector3 = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleDistance)
+        //print("circleCenter: \(circleCenter)")
         
         // Next calculate the displacement force, which is responsible for right or left turn
         // Since it just generates disturbance, it can point anywhere
         var displacement = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleRadius)
-        
+        //print("original displacement: \(displacement)")
         let randTurnValue = Float(arc4random_uniform(2)+1)
         var turn: Float
         
@@ -206,16 +214,36 @@ class SteeringBehaviors: NSObject {
         
         // generate random vector direction based on angle
         var rotAngle = Float(arc4random_uniform(UInt32.max))/Float(UInt32.max) * wanderJitter
-        rotAngle *= turn
-        print("rotAngle: \(rotAngle)")
+        //print("rotAngle: \(rotAngle)")
+        //rotAngle *= turn
         
+        // ROTATION AROUND THE 1 axis
+        // RX=	1	0	0
+        // 0	cos φ	- sin φ
+        //0	sin φ	cos φ
+        
+        let rotationMatrix = SCNMatrix4MakeRotation(CGFloat(rotAngle), 0, CGFloat(turn), 0)
+        let glkVector = GLKVector3Make(Float(displacement.x), Float(displacement.y), Float(displacement.z))
+        let glkMatrix = GLKMatrix4Make(Float(rotationMatrix.m11), Float(rotationMatrix.m12), Float(rotationMatrix.m13), Float(rotationMatrix.m14), Float(rotationMatrix.m21), Float(rotationMatrix.m22), Float(rotationMatrix.m23), Float(rotationMatrix.m24), Float(rotationMatrix.m31), Float(rotationMatrix.m32), Float(rotationMatrix.m33), Float(rotationMatrix.m34), Float(rotationMatrix.m41), Float(rotationMatrix.m42), Float(rotationMatrix.m43), Float(rotationMatrix.m44))
+        let glkRotatedVector = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix, glkVector)
+        var rotatedVector = SCNVector3FromGLKVector3(glkRotatedVector)
+        rotatedVector.y = 0
+        //print("rotatedVector: \(rotatedVector)")
         // Change displacement
-        displacement.x = CGFloat(cos(rotAngle))
-        displacement.z = CGFloat(sin(rotAngle))
-        let wanderForce = VectorMath.addVectorToVector(circleCenter, right: displacement)
+        displacement.x = displacement.x+(CGFloat(cos(rotAngle))*circleRadius)
+        displacement.z = displacement.z+(CGFloat(sin(rotAngle))*circleRadius)
+        //print("new displacement: \(displacement)")
+        //var wanderForce = VectorMath.addVectorToVector(circleCenter, right: displacement)
+        var wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
         
+        // then normalize wanderForce
+        //wanderForce = VectorMath.getNormalizedVector(wanderForce)
+        let wanderForceDirection = VectorMath.getDirectionVector(owner.presentationNode.position, finishPoint: wanderForce)
+        //print("wanderForce: \(wanderForce)")
+        //print("wanderForceDirection: \(wanderForceDirection)")
         steering = VectorMath.addVectorToVector(steering, right: wanderForce)
-        return wanderForce 
+        
+        return wanderForceDirection
     }
     
     func wanderOn() {
@@ -233,45 +261,38 @@ class SteeringBehaviors: NSObject {
     }
 
     func wallAvoidance() -> SCNVector3 {
-        
         // a vector that has the same direction as the owner's movement direction but is longer
         // this represents the owner's line of sight
-        let seeAhead = VectorMath.multiplyVectorByScalar(owner.currentMovementDirection, right: 30)
+        let seeAhead = VectorMath.multiplyVectorByScalar(owner.currentMovementDirection, right: 50)
+        let seeAheadPoint = VectorMath.addVectorToVector(owner.presentationNode.position, right: seeAhead)
+        
+        // CREATE TWO OTHER FEELERS ON EITHER SIDE OF THE OWNER?
         
         // now perform a hit-test based on the seeAhead line segment
         // returns the closest collision object to the owner
-        let collisionObjs = owner.levelNode.hitTestWithSegmentFromPoint(owner.presentationNode.position, toPoint: seeAhead, options: nil)
+        let collisionObjs = owner.levelNode.hitTestWithSegmentFromPoint(owner.presentationNode.position, toPoint: seeAheadPoint, options: nil)
         
         var firstCollisionObj: SCNNode?
         if collisionObjs.count > 0 {
-            
             for collisionObj in collisionObjs {
                 if collisionObj.node.name == "wall" {
                     firstCollisionObj = collisionObj.node
                     break
                 }
             }
-            if let firstObj = firstCollisionObj {
-        print("found collision object ahead")
-        print("owner position: \(owner.presentationNode.position)")
-        print("collision object position: \(firstObj.presentationNode.position)")
-        print("collision object name: \(firstObj.name)")
+        if let firstObj = firstCollisionObj {
         // avoidance force
         // determined by: collision seeAhead - collision point
         var avoidanceForce = VectorMath.getDirectionVector(firstObj.presentationNode.position, finishPoint: seeAhead)
         // normalized the avoidance force and scale by the seeAhead magnitude
         avoidanceForce = VectorMath.getNormalizedVector(avoidanceForce)
-        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: 100)
+        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: VectorMath.getVectorMagnitude(seeAhead)*2)
         avoidanceForce.y = 0
-                print("avoidanceForce: \(avoidanceForce)")
                 return avoidanceForce
             } else {
                 SCNVector3Make(0, 0, 0)
             }
         
-        } else {
-        
-        return SCNVector3Make(0, 0, 0)
         }
         
         return SCNVector3Make(0, 0, 0)

@@ -30,19 +30,22 @@ class WeaponFactory: NSObject {
         
         for childNode in nodeArray {
             
-            // Set position
-            handgun.position = SCNVector3Make(1, -3, -3)
-            let geometry = SCNBox(width: 5, height: 5, length: 5, chamferRadius: 1)
-            let shape = SCNPhysicsShape(geometry: geometry, options: nil)
-            
-            // Set physics
-            handgun.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
-            handgun.physicsBody?.categoryBitMask = ColliderType.Weapon
-            handgun.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Enemy | ColliderType.Wall
-            
             // Add model as child node
+            childNode.physicsBody = nil;
             handgun.addChildNode(childNode)
         }
+        
+        // Set position
+        handgun.position = SCNVector3Make(1, -3, -3)
+        
+        // Set physics
+        //let shape = SCNPhysicsShape(node: handgun, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
+        //let geometry = SCNBox(width: 6, height: 6, length: 10, chamferRadius: 1)
+        //let shape = SCNPhysicsShape(geometry: geometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeBoundingBox])
+        
+        handgun.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: nil)
+        handgun.physicsBody?.categoryBitMask = ColliderType.Weapon
+        handgun.physicsBody?.collisionBitMask = ColliderType.Wall | ColliderType.Enemy
         
         return handgun
     }

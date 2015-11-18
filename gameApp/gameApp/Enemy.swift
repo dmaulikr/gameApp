@@ -107,15 +107,15 @@ class Enemy: SCNNode {
         
         if distance < self.panicDistance {
         // Then take care of translation
-            playerTransform.m41 = self.presentationNode.position.x + self.steer.flee(target.presentationNode.position).x
+            playerTransform.m41 = self.presentationNode.position.x + self.steer.flee(target.presentationNode.position).x + self.steer.wallAvoidance().x
             playerTransform.m42 = self.presentationNode.position.y
-            playerTransform.m43 = self.presentationNode.position.z + self.steer.flee(target.presentationNode.position).z
+            playerTransform.m43 = self.presentationNode.position.z + self.steer.flee(target.presentationNode.position).z + self.steer.wallAvoidance().z
             playerTransform.m44 = 1.0
         
         } else {
-            playerTransform.m41 = self.presentationNode.position.x + self.steer.arrive(target.presentationNode.position).x
-            playerTransform.m42 = self.position.y + self.steer.arrive(target.presentationNode.position).y
-            playerTransform.m43 = self.presentationNode.position.z + self.steer.arrive(target.presentationNode.position).z
+            playerTransform.m41 = self.presentationNode.position.x + self.steer.arrive(target.presentationNode.position).x + self.steer.wallAvoidance().x
+            playerTransform.m42 = self.position.y + self.steer.arrive(target.presentationNode.position).y + self.steer.wallAvoidance().y
+            playerTransform.m43 = self.presentationNode.position.z + self.steer.arrive(target.presentationNode.position).z + self.steer.wallAvoidance().z
             playerTransform.m44 = 1.0
             
         }
@@ -125,12 +125,17 @@ class Enemy: SCNNode {
         
         // Get direction to wander:
         var wanderDirection = self.steer.wander()
+        print("wanderDirection: \(wanderDirection)")
+        wanderDirection = VectorMath.getNormalizedVector(wanderDirection)
+        wanderDirection = VectorMath.multiplyVectorByScalar(wanderDirection, right: 0.5)
+        //wanderDirection = VectorMath.addVectorToVector(wanderDirection, right: self.steer.wallAvoidance())
         //wanderDirection = VectorMath.getNormalizedVector(wanderDirection)
-        currentMovementDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: wanderDirection)
-        //currentMovementDirection = wanderDirection
-        wanderDirection = VectorMath.addVectorToVector(wanderDirection, right: self.steer.wallAvoidance())
-        let wanderAction = SCNAction.moveTo(wanderDirection, duration: 0.5)
-        self.runAction(wanderAction)
+        let resultingPosition = VectorMath.addVectorToVector(self.presentationNode.position, right: wanderDirection)
+        //let resultingPositionScaled = VectorMath.multiplyVectorByScalar(resultingPosition, right: 1.1)
+        currentMovementDirection = VectorMath.getNormalizedVector(VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: resultingPosition))
+        let wanderAction = SCNAction.moveTo(resultingPosition, duration: 5.0)
+            self.physicsBody?.applyForce(wanderDirection, impulse: true)
+        //self.runAction(wanderAction)
         
         oldRotation = self.transform
             
