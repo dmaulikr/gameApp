@@ -21,6 +21,8 @@ class GameLevel: NSObject {
     var bulletArray: Array<SCNNode>!
     var levelNode: SCNNode!
     var bulletAudioSource: SCNAudioSource!
+    var gruntAudioSource: SCNAudioSource!
+    var soundtrackAudioSource: SCNAudioSource!
     
     var movementDirectionVector: SCNVector3?
     var shootingDirectionVector: SCNVector3?
@@ -33,6 +35,8 @@ class GameLevel: NSObject {
     var verticalRotation: SCNMatrix4?
     
     var fired: Bool?
+    
+    let kUpdateHealthNK = "elg-updateHealth"
     
     override init() {
         super.init()
@@ -81,7 +85,7 @@ class GameLevel: NSObject {
                 let shape = SCNPhysicsShape(geometry: wallGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
                 childNode.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
                 childNode.physicsBody?.categoryBitMask = ColliderType.Wall
-                childNode.physicsBody?.collisionBitMask = ColliderType.Weapon | ColliderType.Player | ColliderType.Enemy | ColliderType.Bullet
+                childNode.physicsBody?.collisionBitMask = ColliderType.Weapon | ColliderType.Player | ColliderType.Enemy | ColliderType.PlayerBullet
             }
             levelNode.addChildNode(childNode)
         }
@@ -94,6 +98,7 @@ class GameLevel: NSObject {
         // create and add a camera to the scene
         self.camera = Camera()
         self.camera.position = SCNVector3(x: 0, y: player.height, z: player.length/2) // over-the-shoulder view
+        self.camera.camera?.zFar = 5000
         player.addChildNode(self.camera)
         
         // create weapon
@@ -121,9 +126,10 @@ class GameLevel: NSObject {
         spotLight.zFar = 10
         light = SCNNode()
         light.light = spotLight
-        light.position = SCNVector3(x: 0, y: 25, z: 25)
-        let constraint = SCNLookAtConstraint(target: player)
+        light.position = SCNVector3(x: 0, y: 15, z: 5)
+        let constraint = SCNLookAtConstraint(target: weapon)
         light.constraints = [constraint]
+        camera.addChildNode(light)
         
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
         shootingDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
@@ -137,6 +143,14 @@ class GameLevel: NSObject {
         fired = false
         bulletArray = [SCNNode]()
         bulletAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/gunshot.mp3")!
+        bulletAudioSource.load()
+        gruntAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/male-grunt.wav")!
+        gruntAudioSource.load()
+        soundtrackAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/Tension Loop.wav")!
+        soundtrackAudioSource.load()
+        soundtrackAudioSource.loops = true
+        let soundtrackAction = SCNAction.playAudioSource(soundtrackAudioSource, waitForCompletion: true)
+        levelNode.runAction(soundtrackAction)
         
         return levelNode
     }
@@ -290,7 +304,7 @@ class GameLevel: NSObject {
     func updateCrosshairAim(){
         
         if fired == true {
-            let bulletSoundAction = SCNAction.playAudioSource(bulletAudioSource, waitForCompletion: true)
+            let bulletSoundAction = SCNAction.playAudioSource(bulletAudioSource, waitForCompletion: false)
             weapon.runAction(bulletSoundAction)
             let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
             let bulletMaterial = SCNMaterial()
@@ -300,7 +314,7 @@ class GameLevel: NSObject {
             bullet!.position = levelNode.convertPosition(camera.presentationNode.position, fromNode: player)
             bullet!.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
             bullet!.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
-            bullet!.physicsBody?.categoryBitMask = ColliderType.Bullet
+            bullet!.physicsBody?.categoryBitMask = ColliderType.PlayerBullet
             bullet!.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Ground
             bullet!.physicsBody?.contactTestBitMask = ColliderType.Enemy | ColliderType.Player | ColliderType.Ground | ColliderType.Wall
             bullet!.name = "bullet"
@@ -308,7 +322,7 @@ class GameLevel: NSObject {
             levelNode.addChildNode(bullet!)
             bulletArray.append(bullet!)
             
-            let impulse = VectorMath.multiplyVectorByScalar(shootingDirectionVector!, right: 300)
+            let impulse = VectorMath.multiplyVectorByScalar(shootingDirectionVector!, right: 700)
             
             bullet!.physicsBody?.applyForce(impulse, impulse: true)
             
@@ -339,6 +353,16 @@ class GameLevel: NSObject {
     func updateEnemy() {
         //enemy.update()
         enemy2.update()
+    }
+    
+    func subtractPlayerHealth(damage: CGFloat) {
+        player.health -= damage
+        
+        let gruntAction = SCNAction.playAudioSource(gruntAudioSource, waitForCompletion: false)
+        player.runAction(gruntAction)
+        
+        // Send notification to HUD to subtract health.
+        NSNotificationCenter.defaultCenter().postNotificationName(kUpdateHealthNK, object: self, userInfo: ["newHealth": player.health])
     }
     
     func getNodeHeadingInWorldSpace(node: SCNNode) -> SCNVector3 {

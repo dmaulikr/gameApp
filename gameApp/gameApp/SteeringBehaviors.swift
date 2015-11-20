@@ -40,6 +40,10 @@ class SteeringBehaviors: NSObject {
         self.steering = SCNVector3Make(0, 0, 0)
     }
     
+    func resetSteering() {
+        steering = SCNVector3Make(0, 0, 0)
+    }
+    
     func on(behaviorType: Int) -> Bool {
         return (bitBehaviors & behaviorType) == behaviorType
     }
@@ -52,7 +56,7 @@ class SteeringBehaviors: NSObject {
         
         let seekVector = VectorMath.multiplyVectorByScalar(movementDirectionNormalized, right: owner.speed)
         
-        steering = VectorMath.addVectorToVector(steering, right: seekVector)
+        //steering = VectorMath.addVectorToVector(steering, right: seekVector)
         return seekVector
     }
     
@@ -101,7 +105,7 @@ class SteeringBehaviors: NSObject {
             steering = VectorMath.addVectorToVector(steering, right: targetVector)
             return targetVector
         }
-        steering = VectorMath.addVectorToVector(steering, right: SCNVector3Make(0, 0, 0))
+        //steering = VectorMath.addVectorToVector(steering, right: SCNVector3Make(0, 0, 0))
         return SCNVector3Make(0, 0, 0)
     }
     
@@ -126,7 +130,7 @@ class SteeringBehaviors: NSObject {
         
         let fleeVector = VectorMath.multiplyVectorByScalar(movementDirectionNormalized, right: owner.speed)
         
-        steering = VectorMath.addVectorToVector(steering, right: fleeVector)
+        //steering = VectorMath.addVectorToVector(steering, right: fleeVector)
         return fleeVector
     }
     
@@ -155,7 +159,7 @@ class SteeringBehaviors: NSObject {
         let predictedVector = VectorMath.addVectorToVector(evader.presentationNode.position, right: VectorMath.multiplyVectorByScalar(forwardFacingOwnerV3, right: lookAheadTime))
 
         // seek to the predicted future position of evader
-        steering = VectorMath.addVectorToVector(steering, right: self.seek(predictedVector))
+        //steering = VectorMath.addVectorToVector(steering, right: self.seek(predictedVector))
         
         return self.seek(predictedVector)
     }
@@ -177,13 +181,13 @@ class SteeringBehaviors: NSObject {
     func wander() -> SCNVector3 {
         
         // radius of the constraining circle
-        let circleRadius: CGFloat = 1
+        let circleRadius: CGFloat = 3
         
         // distance the wander circle is projected in front of the agent
         let circleDistance: CGFloat = 1
         
         // the maximum amount of random displacement that can be added to target each second
-        let wanderJitter: Float = Float(M_PI_4)
+        let wanderJitter: Float = Float(M_PI)
         
         // randomize starting vector?
         
@@ -191,18 +195,18 @@ class SteeringBehaviors: NSObject {
         let randZValue = Int(arc4random_uniform(3))-1
         
         let randomStartVec = SCNVector3Make(CGFloat(randXValue), 0, CGFloat(randZValue))
-        //print("randomStartVec: \(randomStartVec)")
+
         let forwardDirection = owner.levelNode.convertPosition(randomStartVec, fromNode: owner.presentationNode)
-        //print("forwardDirection: \(forwardDirection)")
+
         // First calculate the circle's position
         // It is always in front of the owner
         let circleCenter: SCNVector3 = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleDistance)
-        //print("circleCenter: \(circleCenter)")
         
         // Next calculate the displacement force, which is responsible for right or left turn
         // Since it just generates disturbance, it can point anywhere
         var displacement = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleRadius)
-        //print("original displacement: \(displacement)")
+
+        // Randomly calculate turn direction
         let randTurnValue = Float(arc4random_uniform(2)+1)
         var turn: Float
         
@@ -212,10 +216,8 @@ class SteeringBehaviors: NSObject {
             turn = -1
         }
         
-        // generate random vector direction based on angle
-        var rotAngle = Float(arc4random_uniform(UInt32.max))/Float(UInt32.max) * wanderJitter
-        //print("rotAngle: \(rotAngle)")
-        //rotAngle *= turn
+        // Generate random vector direction based on angle
+        let rotAngle = Float(arc4random_uniform(UInt32.max))/Float(UInt32.max) * wanderJitter
         
         // ROTATION AROUND THE 1 axis
         // RX=	1	0	0
@@ -228,19 +230,17 @@ class SteeringBehaviors: NSObject {
         let glkRotatedVector = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix, glkVector)
         var rotatedVector = SCNVector3FromGLKVector3(glkRotatedVector)
         rotatedVector.y = 0
-        //print("rotatedVector: \(rotatedVector)")
-        // Change displacement
-        displacement.x = displacement.x+(CGFloat(cos(rotAngle))*circleRadius)
-        displacement.z = displacement.z+(CGFloat(sin(rotAngle))*circleRadius)
-        //print("new displacement: \(displacement)")
-        //var wanderForce = VectorMath.addVectorToVector(circleCenter, right: displacement)
-        var wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
         
-        // then normalize wanderForce
-        //wanderForce = VectorMath.getNormalizedVector(wanderForce)
-        let wanderForceDirection = VectorMath.getDirectionVector(owner.presentationNode.position, finishPoint: wanderForce)
-        //print("wanderForce: \(wanderForce)")
-        //print("wanderForceDirection: \(wanderForceDirection)")
+        // Change displacement
+       // displacement.x = displacement.x+(CGFloat(cos(rotAngle))*circleRadius)
+       // displacement.z = displacement.z+(CGFloat(sin(rotAngle))*circleRadius)
+        
+        let wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
+        
+        // Get direction
+        var wanderForceDirection = VectorMath.getDirectionVector(owner.presentationNode.position, finishPoint: wanderForce)
+        wanderForceDirection = VectorMath.getNormalizedVector(wanderForceDirection)
+        
         steering = VectorMath.addVectorToVector(steering, right: wanderForce)
         
         return wanderForceDirection
@@ -263,10 +263,9 @@ class SteeringBehaviors: NSObject {
     func wallAvoidance() -> SCNVector3 {
         // a vector that has the same direction as the owner's movement direction but is longer
         // this represents the owner's line of sight
-        let seeAhead = VectorMath.multiplyVectorByScalar(owner.currentMovementDirection, right: 50)
+        let ownerDirection = VectorMath.getNormalizedVector((owner.physicsBody?.velocity)!)
+        let seeAhead = VectorMath.multiplyVectorByScalar(ownerDirection, right: 25)
         let seeAheadPoint = VectorMath.addVectorToVector(owner.presentationNode.position, right: seeAhead)
-        
-        // CREATE TWO OTHER FEELERS ON EITHER SIDE OF THE OWNER?
         
         // now perform a hit-test based on the seeAhead line segment
         // returns the closest collision object to the owner
@@ -281,20 +280,27 @@ class SteeringBehaviors: NSObject {
                 }
             }
         if let firstObj = firstCollisionObj {
+        
         // avoidance force
         // determined by: collision seeAhead - collision point
         var avoidanceForce = VectorMath.getDirectionVector(firstObj.presentationNode.position, finishPoint: seeAhead)
-        // normalized the avoidance force and scale by the seeAhead magnitude
+        
+            // normalized the avoidance force and scale by the seeAhead magnitude
         avoidanceForce = VectorMath.getNormalizedVector(avoidanceForce)
-        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: VectorMath.getVectorMagnitude(seeAhead)*2)
+        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: 5)
         avoidanceForce.y = 0
+            
+            steering = VectorMath.addVectorToVector(steering, right: avoidanceForce)
+            
                 return avoidanceForce
             } else {
-                SCNVector3Make(0, 0, 0)
+            steering = VectorMath.addVectorToVector(steering, right: SCNVector3Make(0, 0, 0))
+                return SCNVector3Make(0, 0, 0)
             }
         
         }
         
+        steering = VectorMath.addVectorToVector(steering, right: SCNVector3Make(0, 0, 0))
         return SCNVector3Make(0, 0, 0)
     }
     

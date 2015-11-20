@@ -14,11 +14,12 @@ class Player: SCNNode {
     let width: CGFloat = 5
     let height: CGFloat = 12
     let length: CGFloat = 2
-    let speed: CGFloat = 0.5
+    let speed: CGFloat = 1.0
     let jumpHeight: CGFloat = 10
-    let health: CGFloat = 100
+    var health: CGFloat = 100
     let damage: CGFloat = 5
     var equippedWeapon: Weapon?
+    var startedEnemyContact: Bool!
     
     var oldHorizontalRotation: SCNMatrix4?
     var horizontalRotation: SCNMatrix4?
@@ -44,6 +45,7 @@ class Player: SCNNode {
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         oldHorizontalRotation = self.transform
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
+        startedEnemyContact = false
     }
     
     required init?(coder: NSCoder) {

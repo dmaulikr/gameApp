@@ -17,9 +17,11 @@ class Weapon: SCNNode {
     var attackInterval: NSTimeInterval?
     var reloadTime: NSTimeInterval?
     var type: WeaponType?
+    var startedEnemyContact: Bool!
     
     override init() {
         super.init()
+        startedEnemyContact = false
     }
     
     required init?(coder: NSCoder) {

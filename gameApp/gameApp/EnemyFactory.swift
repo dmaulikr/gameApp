@@ -39,8 +39,8 @@ class EnemyFactory: NSObject {
         //android.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
         android.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
         android.physicsBody?.categoryBitMask = ColliderType.Enemy
-        android.physicsBody?.collisionBitMask = ColliderType.Bullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall | ColliderType.Player
-        android.physicsBody?.contactTestBitMask = ColliderType.Bullet | ColliderType.Player 
+        android.physicsBody?.collisionBitMask = ColliderType.PlayerBullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall | ColliderType.Player
+        android.physicsBody?.contactTestBitMask = ColliderType.PlayerBullet | ColliderType.Player
         return android
     }
     
@@ -55,7 +55,7 @@ class EnemyFactory: NSObject {
         robbie.levelNode = levelNode
         
         // Get model
-        let robbieScene = SCNScene(named: "art.scnassets/Robbie_the_Rabbit_rigged/Robbie_the_Rabbit_rigged copy.scn")
+        let robbieScene = SCNScene(named: "art.scnassets/Robbie_the_Rabbit_rigged copy.scn")
         let nodeArray = robbieScene!.rootNode.childNodes
         
         for childNode in nodeArray {
@@ -74,7 +74,8 @@ class EnemyFactory: NSObject {
         robbie.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: nil)
         robbie.physicsBody?.categoryBitMask = ColliderType.Enemy
         robbie.physicsBody?.collisionBitMask =  ColliderType.Ground | ColliderType.Wall | ColliderType.Player | ColliderType.Weapon
-        robbie.physicsBody?.contactTestBitMask = ColliderType.Bullet
+        robbie.physicsBody?.contactTestBitMask = ColliderType.PlayerBullet
+        robbie.physicsBody?.contactTestBitMask = ColliderType.Player | ColliderType.Weapon
         robbie.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         
         return robbie

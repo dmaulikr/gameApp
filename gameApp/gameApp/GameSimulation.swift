@@ -14,8 +14,9 @@ struct ColliderType {
     static let Enemy = 0x1 << 1 // 2
     static let Ground = 0x1 << 2 // 4
     static let Weapon = 0x1 << 3 // 8
-    static let Bullet = 0x1 << 4 // 16
+    static let PlayerBullet = 0x1 << 4 // 16
     static let Wall = 0x1 << 5 // 32
+    static let EnemyBullet = 0x1 << 6 // 64
 }
 
 struct Keystroke {
@@ -54,10 +55,10 @@ struct Keystroke {
 }
 
 class GameSimulation: SCNScene {
-
+    
     let kPlayerControlsNK = "elg-playerControls"
     var gameLevel: GameLevel!
-
+    
     override init() {
         super.init()
         
@@ -105,7 +106,7 @@ class GameSimulation: SCNScene {
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
                         //print("Camera pan is not nil")
-                       gameLevel.calculateCameraRotationTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
+                        gameLevel.calculateCameraRotationTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
                     } else {
                         // No rotations must happen anymore
                         //print("Game Sim: camera not panning")
@@ -120,7 +121,7 @@ class GameSimulation: SCNScene {
             case .Attack:
                 
                 gameLevel.playerAttack()
-                                
+                
             case .Interact:
                 print ("the button event was interact")
             }
@@ -157,18 +158,44 @@ extension GameSimulation : SCNPhysicsContactDelegate {
         
         switch contactMask {
         case ColliderType.Player | ColliderType.Enemy:
-            print("collision between player and enemy")
-        case ColliderType.Player | ColliderType.Bullet:
-            print("collision between player and bullet")
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Enemy {
+                let enemy = contact.nodeA as! Enemy
+                let player = contact.nodeB as! Player
+                if player.startedEnemyContact == false {
+                    player.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(enemy.damage)
+                }
+            } else {
+                let enemy = contact.nodeB as! Enemy
+                let player = contact.nodeA as! Player
+                if player.startedEnemyContact == false {
+                    player.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(enemy.damage)
+                }
+            }
+        case ColliderType.Enemy | ColliderType.Weapon:
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Enemy {
+                let enemy = contact.nodeA as! Enemy
+                let player = contact.nodeB as! Weapon
+                if player.startedEnemyContact == false {
+                    player.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(enemy.damage)
+                }
+            } else {
+                let enemy = contact.nodeB as! Enemy
+                let player = contact.nodeA as! Weapon
+                if player.startedEnemyContact == false {
+                    player.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(enemy.damage)
+                }
+            }
             
+        case ColliderType.Player | ColliderType.EnemyBullet:
+            break;
             // calculate the damage to the player
-            
-        case ColliderType.Weapon | ColliderType.Enemy:
-            print("collision between weapon and enemy")
-        case ColliderType.Bullet | ColliderType.Enemy:
-            print("collision between bullet and enemy")
-            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Bullet {
-               let bullet = contact.nodeA
+        case ColliderType.PlayerBullet | ColliderType.Enemy:
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.PlayerBullet {
+                let bullet = contact.nodeA
                 if bullet.parentNode != nil {
                     gameLevel.subtractEnemyHealth()
                 }
@@ -184,27 +211,38 @@ extension GameSimulation : SCNPhysicsContactDelegate {
                 bullet.geometry?.firstMaterial?.diffuse.contents = nil
                 bullet.removeFromParentNode()
             }
-        case ColliderType.Bullet | ColliderType.Ground:
+        case ColliderType.PlayerBullet | ColliderType.Ground:
             break
-        case ColliderType.Ground | ColliderType.Enemy:
-            print("collision between ground and enemy")
-        case ColliderType.Ground | ColliderType.Player:
-            print("collision between ground and player")
-        case ColliderType.Wall | ColliderType.Enemy:
-            print("collision between wall and enemy")
-        case ColliderType.Wall | ColliderType.Player:
-            print("collision between wall and player")
         case ColliderType.Wall | ColliderType.Weapon:
             print("collision between wall and weapon")
-        case ColliderType.Wall | ColliderType.Bullet:
-            print("collision between wall and bullet")
         default: break
         }
         
     }
     
     func physicsWorld(world: SCNPhysicsWorld, didEndContact contact: SCNPhysicsContact) {
-        // add code
+        let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
+        
+        switch contactMask {
+        case ColliderType.Player | ColliderType.Enemy:
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Player {
+                let player = contact.nodeA as! Player
+                player.startedEnemyContact = false
+            } else {
+                let player = contact.nodeB as! Player
+                player.startedEnemyContact = false
+            }
+        case ColliderType.Enemy | ColliderType.Weapon:
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Weapon {
+                let weapon = contact.nodeA as! Weapon
+                weapon.startedEnemyContact = false
+            } else {
+                let weapon = contact.nodeB as! Weapon
+                weapon.startedEnemyContact = false
+            }
+        default:
+            break;
+        }
     }
     
     func physicsWorld(world: SCNPhysicsWorld, didUpdateContact contact: SCNPhysicsContact) {
