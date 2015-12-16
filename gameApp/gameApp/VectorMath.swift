@@ -58,4 +58,8 @@ class VectorMath: NSObject {
         return SCNVector3Make(left.y*right.z-left.z*right.y, left.z*right.x-left.x*right.z, left.x*right.y-left.y*right.x)
     }
     
+    static func radiansToDegrees(radians: CGFloat) -> CGFloat {
+        return radians*(CGFloat(180/M_PI))
+    }
+    
 }

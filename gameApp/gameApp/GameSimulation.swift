@@ -56,7 +56,6 @@ struct Keystroke {
 
 class GameSimulation: SCNScene {
     
-    let kPlayerControlsNK = "elg-playerControls"
     var gameLevel: GameLevel!
     
     override init() {
@@ -66,7 +65,7 @@ class GameSimulation: SCNScene {
         self.gameLevel = GameLevel()
         let levelNode: SCNNode = gameLevel.createLevel(self)
         self.rootNode.addChildNode(levelNode)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: kPlayerControlsNK, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: Constants.Notifications.playerControls, object: nil)
         
     }
     

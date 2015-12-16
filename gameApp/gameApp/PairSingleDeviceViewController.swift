@@ -17,9 +17,6 @@ class PairSingleDeviceViewController: NSViewController {
     var serviceManager: ServiceManager?
     var gameViewController: GameViewController?
     
-    private let kAddPeerInviteNK = "elg-addPeerInvite"
-    private let switchToGameViewNK = "elg-switchToGameView"
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         let viewLayer = CALayer()
@@ -29,8 +26,8 @@ class PairSingleDeviceViewController: NSViewController {
         self.view.addSubview(pairDeviceView)
         
         // Do view setup here.
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "addPeerInvite:", name: kAddPeerInviteNK, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "switchToGameView", name: switchToGameViewNK, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "addPeerInvite:", name: Constants.Notifications.addPeerInvite, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "switchToGameView", name: Constants.Notifications.switchToGameView, object: nil)
         serviceManager = ServiceManager()
     }
     

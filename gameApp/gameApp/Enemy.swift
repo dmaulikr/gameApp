@@ -126,31 +126,31 @@ class Enemy: SCNNode {
             let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.target.presentationNode.position)
             let distance = VectorMath.getVectorMagnitude(toTarget)
             
-                        switch(distance) {
-//                        case 0..<self.panicDistance:
-//                            print("panic distance")
-//                            var fleeForce = self.steer.flee(target.presentationNode.position)
-//                            fleeForce = VectorMath.getNormalizedVector(fleeForce)
-//                            print("fleeForce: \(fleeForce)")
-//                            self.physicsBody?.applyForce(fleeForce, impulse: true)
-                        case 0..<75:
-                            var arriveForce = self.steer.arrive(target.presentationNode.position)
-                            if arriveForce.x > 0 || arriveForce.y > 0 {
-                            arriveForce = VectorMath.getNormalizedVector(arriveForce)
-                            self.physicsBody?.applyForce(arriveForce, impulse: true)
-                            } else {
-                                self.physicsBody?.clearAllForces()
-                            }
-                        default:
-                            // Get direction to wander:
-                            var wanderDirection = self.steer.wander()
-                            let wallAvoidance = self.steer.wallAvoidance()
-                            wanderDirection = VectorMath.addVectorToVector(wanderDirection, right: wallAvoidance)
-                            self.physicsBody?.applyForce(wanderDirection, impulse: true)
+                                    switch(distance) {
+                                    case 0..<self.panicDistance:
+                                        //self.physicsBody?.clearAllForces()
+                                        var fleeForce = self.steer.flee(target.presentationNode.position)
+                                        fleeForce = VectorMath.getNormalizedVector(fleeForce)
+                                        self.physicsBody?.applyForce(fleeForce, impulse: true)
+                                    case self.panicDistance..<75:
+                                        var arriveForce = self.steer.arrive(target.presentationNode.position)
+                                        if arriveForce.x > 0 || arriveForce.y > 0 {
+                                        arriveForce = VectorMath.getNormalizedVector(arriveForce)
+                                        arriveForce = VectorMath.multiplyVectorByScalar(arriveForce, right: 0.6)
+                                        self.physicsBody?.applyForce(arriveForce, impulse: true)
+                                        } else {
+                                            self.physicsBody?.clearAllForces()
+                                        }
+                                    default:
+                                        // Get direction to wander:
+                                        var wanderDirection = self.steer.wander()
+                                        let wallAvoidance = self.steer.wallAvoidance()
+                                        wanderDirection = VectorMath.addVectorToVector(wanderDirection, right: wallAvoidance)
+                                        self.physicsBody?.applyForce(wanderDirection, impulse: true)
             
-//                            let resultingPosition = VectorMath.addVectorToVector(self.presentationNode.position, right: wanderDirection)
-//                            currentMovementDirection = VectorMath.getNormalizedVector(VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: resultingPosition))
-                        }
+            //                            let resultingPosition = VectorMath.addVectorToVector(self.presentationNode.position, right: wanderDirection)
+            //                            currentMovementDirection = VectorMath.getNormalizedVector(VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: resultingPosition))
+                                    }
             
             // Get direction to wander:
             var wanderDirection = self.steer.wander()
@@ -165,12 +165,17 @@ class Enemy: SCNNode {
             
             // Now must calculate the rotation direction
             // 1 Determine which way the object is facing
-            var facingDirection = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: self.presentationNode)
+            let facingPoint = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: 10), fromNode: self.presentationNode)
+            var facingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: facingPoint)
             facingDirection = VectorMath.getNormalizedVector(facingDirection)
-
+            
             // 2 Determine which way the object should be facing
-            let shouldBeFacingDirection = VectorMath.getNormalizedVector(wanderDirection)
+            //let shouldBeFacingDirection = VectorMath.getNormalizedVector(wanderDirection)
             //let shouldBeFacingDirection = VectorMath.getNormalizedVector((self.physicsBody?.velocity)!)
+            
+            // get vector towards player
+            var shouldBeFacingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.target.presentationNode.position)
+            shouldBeFacingDirection = VectorMath.getNormalizedVector(shouldBeFacingDirection)
             
             // 3 Determine the angle between those directions
             let dot = VectorMath.dotProduct(facingDirection, right: shouldBeFacingDirection)
@@ -181,33 +186,35 @@ class Enemy: SCNNode {
             rotationAxis = VectorMath.getNormalizedVector(rotationAxis)
             
             // 5 Rotate object about rotationAxis by rotationAngle
-                if rotationAxis.y < 0 {
-                    self.physicsBody?.applyTorque(SCNVector4Make(0, 1, 0, rotationAngle), impulse: true)
-                    //self.physicsBody?.angularVelocity = SCNVector4Make(0, -1, 0, rotationAngle)
-                } else {
-                    self.physicsBody?.applyTorque(SCNVector4Make(0, -1, 0, rotationAngle), impulse: true)
-                    //self.physicsBody?.angularVelocity = SCNVector4Make(0, 1, 0, rotationAngle)
-                }
+            if VectorMath.radiansToDegrees(rotationAngle) > 10 {
+            if rotationAxis.y < 0 {
+                self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
+            } else  {
+                self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
+            }
+            } else {
+                self.physicsBody?.clearAllForces()
+            }
             
             // Wait for a duration, and then shoot
             self.runAction(SCNAction.waitForDuration(3), completionHandler: {
-            let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
-            let bulletMaterial = SCNMaterial()
-            bulletMaterial.diffuse.contents = NSColor.purpleColor()
-            bulletGeometry.materials = [bulletMaterial]
-            var bullet = SCNNode(geometry: bulletGeometry)
-            bullet.position = SCNVector3Make(self.presentationNode.position.x, 7, self.presentationNode.position.z)
-            bullet.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
-            bullet.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
-            bullet.name = "bullet"
-            
-            //self.levelNode.addChildNode(bullet)
-            
-            let shootingDirectionVector = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: self.presentationNode)
-            
-            let impulse = VectorMath.multiplyVectorByScalar(shootingDirectionVector, right: 5)
-            
-            //bullet.physicsBody?.applyForce(impulse, impulse: true)
+                let bulletGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 1)
+                let bulletMaterial = SCNMaterial()
+                bulletMaterial.diffuse.contents = NSColor.purpleColor()
+                bulletGeometry.materials = [bulletMaterial]
+                var bullet = SCNNode(geometry: bulletGeometry)
+                bullet.position = SCNVector3Make(self.presentationNode.position.x, 7, self.presentationNode.position.z)
+                bullet.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: SCNPhysicsShape(geometry: bulletGeometry, options: nil))
+                bullet.physicsBody?.velocityFactor = SCNVector3Make(1, 0.5, 1)
+                bullet.name = "bullet"
+                
+                //self.levelNode.addChildNode(bullet)
+                
+                let shootingDirectionVector = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: -1), fromNode: self.presentationNode)
+                
+                let impulse = VectorMath.multiplyVectorByScalar(shootingDirectionVector, right: 5)
+                
+                //bullet.physicsBody?.applyForce(impulse, impulse: true)
             })
             
             

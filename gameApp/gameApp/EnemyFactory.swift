@@ -49,7 +49,7 @@ class EnemyFactory: NSObject {
         robbie.health = 100
         robbie.damage = 20
         robbie.speed = 0.4
-        robbie.panicDistance = 20
+        robbie.panicDistance = 25
         robbie.viewDistance = 50
         robbie.target = target
         robbie.levelNode = levelNode
@@ -77,6 +77,9 @@ class EnemyFactory: NSObject {
         robbie.physicsBody?.contactTestBitMask = ColliderType.PlayerBullet
         robbie.physicsBody?.contactTestBitMask = ColliderType.Player | ColliderType.Weapon
         robbie.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
+        robbie.physicsBody?.angularDamping = 0.9
+        robbie.physicsBody?.damping = 0.9
+        robbie.physicsBody?.restitution = 0
         
         return robbie
     }

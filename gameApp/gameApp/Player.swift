@@ -41,6 +41,7 @@ class Player: SCNNode {
         self.physicsBody?.categoryBitMask = ColliderType.Player
         self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy
         self.physicsBody?.friction = 0.7
+        self.physicsBody?.restitution = 0 // does not bounce during collisions
         
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         oldHorizontalRotation = self.transform

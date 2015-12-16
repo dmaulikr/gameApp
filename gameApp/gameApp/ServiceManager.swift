@@ -13,9 +13,6 @@ class ServiceManager : NSObject {
     
     // Service type must be a unique string, at most 15 characters long
     private let GameServiceType = "elg-escape-game"
-    private let kAddPeerInviteNK = "elg-addPeerInvite"
-    private let switchToGameViewNK = "elg-switchToGameView"
-    let kPlayerControlsNK = "elg-playerControls"
     let kPeerIDKey = "elg-peerid"
     
     var peerId: MCPeerID
@@ -26,11 +23,9 @@ class ServiceManager : NSObject {
     override init () {
         defaults = NSUserDefaults.standardUserDefaults()
         if let peerIDData = defaults.dataForKey(kPeerIDKey) {
-        print("peerID already exists")
         peerId = NSKeyedUnarchiver.unarchiveObjectWithData(peerIDData) as! MCPeerID
         print("peerID: \(peerId)")
         } else {
-            print("peerID does not yet exist. Create a new one.")
         peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
         print("peerID: \(peerId)")
         let peerIDData = NSKeyedArchiver.archivedDataWithRootObject(peerId)
@@ -92,7 +87,7 @@ extension ServiceManager : MCSessionDelegate {
         
         if(state == MCSessionState.Connected) {
             // Here must switch to the game view for now
-            NSNotificationCenter.defaultCenter().postNotificationName(switchToGameViewNK, object: self, userInfo: nil)
+            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.switchToGameView, object: self, userInfo: nil)
         }
     }
     
@@ -107,7 +102,7 @@ extension ServiceManager : MCSessionDelegate {
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
         
         // Send notification to GameControllerView that controls have been sent
-        NSNotificationCenter.defaultCenter().postNotificationName(kPlayerControlsNK, object: self, userInfo: ["strokeInfo": data])
+        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerControls, object: self, userInfo: ["strokeInfo": data])
         
     }
     

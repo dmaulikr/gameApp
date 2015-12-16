@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E62A2301C1D88A20089E9CC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E62A22F1C1D88A20089E9CC /* Constants.swift */; };
 		9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2059FE1BCAF6A200A66DC2 /* Player.swift */; };
 		9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205A001BCAFA1000A66DC2 /* Camera.swift */; };
 		9E205A031BCB73A100A66DC2 /* HUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205A021BCB73A100A66DC2 /* HUD.swift */; };
@@ -52,6 +53,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6E62A22F1C1D88A20089E9CC /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9E2059FE1BCAF6A200A66DC2 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		9E205A001BCAFA1000A66DC2 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		9E205A021BCB73A100A66DC2 /* HUD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUD.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 				9E8B381F1BE7F3DB002DA997 /* SteeringBehaviors.swift */,
 				9E230F0F1BB07F100046CC4E /* GameView.swift */,
 				9E230F3C1BB07F500046CC4E /* ServiceManager.swift */,
+				6E62A22F1C1D88A20089E9CC /* Constants.swift */,
 				9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */,
 				9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */,
 				9EB3C60A1BE1C3C700C17A80 /* GameSimulation.swift */,
@@ -318,6 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E8B38201BE7F3DB002DA997 /* SteeringBehaviors.swift in Sources */,
+				6E62A2301C1D88A20089E9CC /* Constants.swift in Sources */,
 				9EB5ACDC1BD6BAC100332B59 /* WeaponFactory.swift in Sources */,
 				9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */,
 				9EB040021BE149C9009F244E /* AIStateMachine.swift in Sources */,

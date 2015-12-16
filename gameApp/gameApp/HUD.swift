@@ -19,8 +19,6 @@ class HUD: SKScene {
     var crosshairTop: SKSpriteNode!
     var crosshairBottom: SKSpriteNode!
     
-    let kUpdateHealthNK = "elg-updateHealth"
-    
     override init() {
         super.init()
     }
@@ -72,7 +70,7 @@ class HUD: SKScene {
 //        self.addChild(crosshairTop)
 //        self.addChild(crosshairBottom)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateHealth:", name: kUpdateHealthNK, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateHealth:", name: Constants.Notifications.updateHealth, object: nil)
         
     }
 

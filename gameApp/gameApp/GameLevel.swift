@@ -36,8 +36,6 @@ class GameLevel: NSObject {
     
     var fired: Bool?
     
-    let kUpdateHealthNK = "elg-updateHealth"
-    
     override init() {
         super.init()
         
@@ -150,7 +148,7 @@ class GameLevel: NSObject {
         soundtrackAudioSource.load()
         soundtrackAudioSource.loops = true
         let soundtrackAction = SCNAction.playAudioSource(soundtrackAudioSource, waitForCompletion: true)
-        levelNode.runAction(soundtrackAction)
+        //levelNode.runAction(soundtrackAction)
         
         return levelNode
     }
@@ -362,7 +360,7 @@ class GameLevel: NSObject {
         player.runAction(gruntAction)
         
         // Send notification to HUD to subtract health.
-        NSNotificationCenter.defaultCenter().postNotificationName(kUpdateHealthNK, object: self, userInfo: ["newHealth": player.health])
+        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHealth, object: self, userInfo: ["newHealth": player.health])
     }
     
     func getNodeHeadingInWorldSpace(node: SCNNode) -> SCNVector3 {
