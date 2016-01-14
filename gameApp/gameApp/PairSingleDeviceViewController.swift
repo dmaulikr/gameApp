@@ -19,6 +19,9 @@ class PairSingleDeviceViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //self.view.enterFullScreenMode(NSScreen.mainScreen()!, withOptions:nil)
+        //self.view.window?.hidesOnDeactivate = true
+        
         let viewLayer = CALayer()
         viewLayer.backgroundColor = CGColorCreateGenericRGB(0.000, 0.114, 0.212, 1.00)
         pairDeviceView.wantsLayer = true

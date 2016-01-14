@@ -11,7 +11,10 @@ import SceneKit
 
 class Camera: SCNNode {
 
+    var oldHorizontalRotation: SCNMatrix4?
     var oldVerticalRotation: SCNMatrix4?
+    
+    var horizontalRotation: SCNMatrix4?
     var verticalRotation: SCNMatrix4?
     
     override init() {
@@ -29,11 +32,18 @@ class Camera: SCNNode {
         super.init(coder: coder)
     }
     
-    func calculateTransform() {
+    func cameraRotationValid(angle: CGFloat) -> Bool {
+        var cameraAngle: CGFloat
+        if self.rotation.x > 0 {
+            cameraAngle = self.rotation.w
+        } else {
+            cameraAngle = -self.rotation.w
+        }
         
-    }
-    
-    func updateTransform() {
-        
+        if cameraAngle + angle < CGFloat(M_PI_2) && cameraAngle + angle > CGFloat(-M_PI_2) {
+            return true
+        } else {
+            return false
+        }
     }
 }

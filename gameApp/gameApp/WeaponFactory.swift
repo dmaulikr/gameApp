@@ -23,15 +23,16 @@ class WeaponFactory: NSObject {
         handgun.ammoLoaded = 8
         handgun.attackInterval = 0.2
         handgun.reloadTime = 1.36
+        handgun.bulletAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/gunshot.mp3")!
+        handgun.bulletAudioSource?.load()
         
         // Get model
         let weaponScene = SCNScene(named: "art.scnassets/Handgun/Handgun.dae")
         let nodeArray = weaponScene!.rootNode.childNodes
         
         for childNode in nodeArray {
-            
             // Add model as child node
-            childNode.physicsBody = nil;
+            childNode.physicsBody = nil
             handgun.addChildNode(childNode)
         }
         
@@ -45,7 +46,7 @@ class WeaponFactory: NSObject {
         
         handgun.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: nil)
         handgun.physicsBody?.categoryBitMask = ColliderType.Weapon
-        handgun.physicsBody?.collisionBitMask = ColliderType.Wall | ColliderType.Enemy
+        handgun.physicsBody?.collisionBitMask = ColliderType.Wall | ColliderType.Enemy | ColliderType.Player
         
         return handgun
     }

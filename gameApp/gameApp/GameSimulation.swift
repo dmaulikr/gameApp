@@ -74,11 +74,13 @@ class GameSimulation: SCNScene {
     }
     
     func playerControls(notification: NSNotification) {
-        let userInfo:Dictionary<String,NSData!> = notification.userInfo as! Dictionary<String,NSData!>
-        let data = userInfo["strokeInfo"]
+        let userInfo:Dictionary<String,NSObject!> = notification.userInfo as! Dictionary<String,NSObject!>
+        let data = userInfo["strokeInfo"] as! NSData
+        let mcPeerID = userInfo["peerID"]
+        let peer = ConnectedPeers.dict.objectForKey(mcPeerID!) as! Peer
         
         var strokeInfo: Keystroke = Keystroke()
-        data!.getBytes(&strokeInfo, length: sizeof(Keystroke))
+        data.getBytes(&strokeInfo, length: sizeof(Keystroke))
         
         switch strokeInfo.interactionType! {
         case .Trackpad:
@@ -90,26 +92,25 @@ class GameSimulation: SCNScene {
                 case .Pan:
                     if strokeInfo.panTranslation != nil {
                         //print("Movement pan is not nil")
-                        gameLevel.calculatePlayerMovementTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
+                        gameLevel.calculatePlayerMovementTransform(peer.player!.id!, panx: strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
                     } else {
                         //print("Game Sim: player not moving")
-                        gameLevel.playerNotMoving()
+                        gameLevel.calculatePlayerMovementTransform(peer.player!.id!, panx: 0, pany: 0)
                     }
                 default: break
                 }
             case .Camera:
                 switch strokeInfo.gestureType! {
                 case .Tap:
-                    gameLevel.player.jump()
+                    gameLevel.jump(peer.player!.id!)
                 case .Pan:
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
                         //print("Camera pan is not nil")
-                        gameLevel.calculateCameraRotationTransform(strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
+                        gameLevel.calculateCameraRotationTransform(peer.player!.id!, panx: strokeInfo.panTranslation!.x, pany: strokeInfo.panTranslation!.y)
                     } else {
                         // No rotations must happen anymore
-                        //print("Game Sim: camera not panning")
-                        gameLevel.cameraNotRotating()
+                        gameLevel.calculateCameraRotationTransform(peer.player!.id!, panx: 0, pany: 0)
                     }
                 }
             }
@@ -119,7 +120,7 @@ class GameSimulation: SCNScene {
                 print("the button event was crouch")
             case .Attack:
                 
-                gameLevel.playerAttack()
+                gameLevel.playerAttack(peer.player!.id!)
                 
             case .Interact:
                 print ("the button event was interact")
@@ -134,7 +135,7 @@ extension GameSimulation : SCNSceneRendererDelegate {
     }
     
     func renderer(renderer: SCNSceneRenderer, updateAtTime time: NSTimeInterval) {
-        gameLevel.updatePlayerTransform()
+        gameLevel.updatePlayersTransform()
         gameLevel.updateCrosshairAim()
         gameLevel.updateEnemy()
         
@@ -162,30 +163,30 @@ extension GameSimulation : SCNPhysicsContactDelegate {
                 let player = contact.nodeB as! Player
                 if player.startedEnemyContact == false {
                     player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(enemy.damage)
+                    gameLevel.subtractPlayerHealth(player.id!, damage: enemy.damage)
                 }
             } else {
                 let enemy = contact.nodeB as! Enemy
                 let player = contact.nodeA as! Player
                 if player.startedEnemyContact == false {
                     player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(enemy.damage)
+                    gameLevel.subtractPlayerHealth(player.id!, damage: enemy.damage)
                 }
             }
         case ColliderType.Enemy | ColliderType.Weapon:
             if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.Enemy {
                 let enemy = contact.nodeA as! Enemy
-                let player = contact.nodeB as! Weapon
-                if player.startedEnemyContact == false {
-                    player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(enemy.damage)
+                let weapon = contact.nodeB as! Weapon
+                if weapon.startedEnemyContact == false {
+                    weapon.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(weapon.owner!.id!, damage: enemy.damage)
                 }
             } else {
                 let enemy = contact.nodeB as! Enemy
-                let player = contact.nodeA as! Weapon
-                if player.startedEnemyContact == false {
-                    player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(enemy.damage)
+                let weapon = contact.nodeA as! Weapon
+                if weapon.startedEnemyContact == false {
+                    weapon.startedEnemyContact = true
+                    gameLevel.subtractPlayerHealth(weapon.owner!.id!, damage: enemy.damage)
                 }
             }
             

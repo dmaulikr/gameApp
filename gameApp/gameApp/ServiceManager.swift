@@ -9,6 +9,12 @@
 import Foundation
 import MultipeerConnectivity
 
+struct ConnectedPeers {
+    static var dict = NSMutableDictionary() // dictionary of peers
+    static var firstConnectionPeerID: MCPeerID?
+    static var secondConnectionPeerID: MCPeerID?
+}
+
 class ServiceManager : NSObject {
     
     // Service type must be a unique string, at most 15 characters long
@@ -17,7 +23,6 @@ class ServiceManager : NSObject {
     
     var peerId: MCPeerID
     var serviceAdvertiser : MCNearbyServiceAdvertiser
-    var player1Code: String?
     var defaults: NSUserDefaults
     
     override init () {
@@ -40,7 +45,6 @@ class ServiceManager : NSObject {
         self.serviceAdvertiser.delegate = self
         self.serviceAdvertiser.startAdvertisingPeer()
         print("Starting advertising peer...")
-        
     }
     
     deinit {
@@ -86,8 +90,24 @@ extension ServiceManager : MCSessionDelegate {
         print("peer \(peerID) didChangeState: \(state.stringValue())")
         
         if(state == MCSessionState.Connected) {
-            // Here must switch to the game view for now
+            // Create new connected peer
+            
+            let newPeer = Peer(peerID: peerID)
+            
+            if ConnectedPeers.dict.count == 0 {
+             ConnectedPeers.firstConnectionPeerID = peerID
+            }
+            
+            if ConnectedPeers.dict.count == 1 {
+                ConnectedPeers.secondConnectionPeerID = peerID
+            }
+            
+            ConnectedPeers.dict.setObject(newPeer, forKey: peerID)
+            
+            if ConnectedPeers.dict.count == 2 {
+                print("connectedPeersDict: \(ConnectedPeers.dict)")
             NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.switchToGameView, object: self, userInfo: nil)
+            }
         }
     }
     
@@ -100,9 +120,8 @@ extension ServiceManager : MCSessionDelegate {
     }
     
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
-        
         // Send notification to GameControllerView that controls have been sent
-        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerControls, object: self, userInfo: ["strokeInfo": data])
+        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerControls, object: self, userInfo: ["strokeInfo": data, "peerID": peerID])
         
     }
     

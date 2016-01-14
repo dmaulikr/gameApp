@@ -181,7 +181,7 @@ class SteeringBehaviors: NSObject {
     func wander() -> SCNVector3 {
         
         // radius of the constraining circle
-        let circleRadius: CGFloat = 3
+        let circleRadius: CGFloat = 1
         
         // distance the wander circle is projected in front of the agent
         let circleDistance: CGFloat = 1
@@ -189,14 +189,12 @@ class SteeringBehaviors: NSObject {
         // the maximum amount of random displacement that can be added to target each second
         let wanderJitter: Float = Float(M_PI)
         
-        // randomize starting vector?
-        
         let randXValue = Int(arc4random_uniform(3))-1
-        let randZValue = Int(arc4random_uniform(3))-1
-        
-        let randomStartVec = SCNVector3Make(CGFloat(randXValue), 0, CGFloat(randZValue))
 
-        let forwardDirection = owner.levelNode.convertPosition(randomStartVec, fromNode: owner.presentationNode)
+        let randomStartGlobal = owner.levelNode.convertPosition(SCNVector3Make(CGFloat(randXValue), 0, 1), fromNode: owner.presentationNode)
+        
+        // Create a directionVector
+        let forwardDirection = VectorMath.getDirectionVector(owner.presentationNode.position, finishPoint: randomStartGlobal)
 
         // First calculate the circle's position
         // It is always in front of the owner
@@ -204,7 +202,7 @@ class SteeringBehaviors: NSObject {
         
         // Next calculate the displacement force, which is responsible for right or left turn
         // Since it just generates disturbance, it can point anywhere
-        var displacement = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleRadius)
+        let displacement = VectorMath.multiplyVectorByScalar(forwardDirection, right: circleRadius)
 
         // Randomly calculate turn direction
         let randTurnValue = Float(arc4random_uniform(2)+1)
@@ -219,11 +217,6 @@ class SteeringBehaviors: NSObject {
         // Generate random vector direction based on angle
         let rotAngle = Float(arc4random_uniform(UInt32.max))/Float(UInt32.max) * wanderJitter
         
-        // ROTATION AROUND THE 1 axis
-        // RX=	1	0	0
-        // 0	cos φ	- sin φ
-        //0	sin φ	cos φ
-        
         let rotationMatrix = SCNMatrix4MakeRotation(CGFloat(rotAngle), 0, CGFloat(turn), 0)
         let glkVector = GLKVector3Make(Float(displacement.x), Float(displacement.y), Float(displacement.z))
         let glkMatrix = GLKMatrix4Make(Float(rotationMatrix.m11), Float(rotationMatrix.m12), Float(rotationMatrix.m13), Float(rotationMatrix.m14), Float(rotationMatrix.m21), Float(rotationMatrix.m22), Float(rotationMatrix.m23), Float(rotationMatrix.m24), Float(rotationMatrix.m31), Float(rotationMatrix.m32), Float(rotationMatrix.m33), Float(rotationMatrix.m34), Float(rotationMatrix.m41), Float(rotationMatrix.m42), Float(rotationMatrix.m43), Float(rotationMatrix.m44))
@@ -231,19 +224,15 @@ class SteeringBehaviors: NSObject {
         var rotatedVector = SCNVector3FromGLKVector3(glkRotatedVector)
         rotatedVector.y = 0
         
-        // Change displacement
-       // displacement.x = displacement.x+(CGFloat(cos(rotAngle))*circleRadius)
-       // displacement.z = displacement.z+(CGFloat(sin(rotAngle))*circleRadius)
+        var wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
         
-        let wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
-        
-        // Get direction
-        var wanderForceDirection = VectorMath.getDirectionVector(owner.presentationNode.position, finishPoint: wanderForce)
-        wanderForceDirection = VectorMath.getNormalizedVector(wanderForceDirection)
+        // Make the wander force less strong so enemy walks slower
+        wanderForce = VectorMath.multiplyVectorByScalar(wanderForce, right: 0.7)
         
         steering = VectorMath.addVectorToVector(steering, right: wanderForce)
         
-        return wanderForceDirection
+        //return wanderForceDirection
+        return wanderForce
     }
     
     func wanderOn() {
@@ -263,9 +252,24 @@ class SteeringBehaviors: NSObject {
     func wallAvoidance() -> SCNVector3 {
         // a vector that has the same direction as the owner's movement direction but is longer
         // this represents the owner's line of sight
+        // Forward Direction Vector
         let ownerDirection = VectorMath.getNormalizedVector((owner.physicsBody?.velocity)!)
-        let seeAhead = VectorMath.multiplyVectorByScalar(ownerDirection, right: 25)
+        let seeAhead = VectorMath.multiplyVectorByScalar(ownerDirection, right: 50)
         let seeAheadPoint = VectorMath.addVectorToVector(owner.presentationNode.position, right: seeAhead)
+        
+        // Left Feeler
+        let rotationMatrix = SCNMatrix4MakeRotation(CGFloat(M_PI_4), 0, -1, 0)
+        let glkVector = GLKVector3Make(Float(seeAhead.x), Float(seeAhead.y), Float(seeAhead.z))
+        let glkMatrix = GLKMatrix4Make(Float(rotationMatrix.m11), Float(rotationMatrix.m12), Float(rotationMatrix.m13), Float(rotationMatrix.m14), Float(rotationMatrix.m21), Float(rotationMatrix.m22), Float(rotationMatrix.m23), Float(rotationMatrix.m24), Float(rotationMatrix.m31), Float(rotationMatrix.m32), Float(rotationMatrix.m33), Float(rotationMatrix.m34), Float(rotationMatrix.m41), Float(rotationMatrix.m42), Float(rotationMatrix.m43), Float(rotationMatrix.m44))
+        let glkRotatedVector = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix, glkVector)
+        var leftFeeler = SCNVector3FromGLKVector3(glkRotatedVector)
+        
+        // Right Feeler
+        let rotationMatrix2 = SCNMatrix4MakeRotation(CGFloat(M_PI_4), 0, 1, 0)
+        let glkVector2 = GLKVector3Make(Float(seeAhead.x), Float(seeAhead.y), Float(seeAhead.z))
+        let glkMatrix2 = GLKMatrix4Make(Float(rotationMatrix2.m11), Float(rotationMatrix2.m12), Float(rotationMatrix2.m13), Float(rotationMatrix2.m14), Float(rotationMatrix2.m21), Float(rotationMatrix2.m22), Float(rotationMatrix2.m23), Float(rotationMatrix2.m24), Float(rotationMatrix2.m31), Float(rotationMatrix2.m32), Float(rotationMatrix2.m33), Float(rotationMatrix2.m34), Float(rotationMatrix2.m41), Float(rotationMatrix2.m42), Float(rotationMatrix2.m43), Float(rotationMatrix2.m44))
+        let glkRotatedVector2 = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix2, glkVector2)
+        var rightFeeler = SCNVector3FromGLKVector3(glkRotatedVector2)
         
         // now perform a hit-test based on the seeAhead line segment
         // returns the closest collision object to the owner
@@ -281,15 +285,25 @@ class SteeringBehaviors: NSObject {
             }
         if let firstObj = firstCollisionObj {
         
+        // determine distance to wall
+        let directionToWall = VectorMath.getDirectionVector(self.owner.position, finishPoint: firstObj.position)
+        let distanceToWall = VectorMath.getVectorMagnitude(directionToWall)
+        
+        // Calculate avoidance force scalar
+        let scalar = (1/distanceToWall)*200
+            
+        // get wall normal ??
+        let globalWallNormal = owner.levelNode.convertPosition(SCNVector3Make(0, 0, 1), fromNode: firstObj.presentationNode)
+        
         // avoidance force
         // determined by: collision seeAhead - collision point
         var avoidanceForce = VectorMath.getDirectionVector(firstObj.presentationNode.position, finishPoint: seeAhead)
         
             // normalized the avoidance force and scale by the seeAhead magnitude
         avoidanceForce = VectorMath.getNormalizedVector(avoidanceForce)
-        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: 5)
+        avoidanceForce = VectorMath.multiplyVectorByScalar(avoidanceForce, right: scalar)
         avoidanceForce.y = 0
-            
+
             steering = VectorMath.addVectorToVector(steering, right: avoidanceForce)
             
                 return avoidanceForce
