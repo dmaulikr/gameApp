@@ -25,17 +25,19 @@ class ServiceManager : NSObject {
     var serviceAdvertiser : MCNearbyServiceAdvertiser
     var defaults: NSUserDefaults
     
+    var inputStream: NSInputStream?
+    
     override init () {
         defaults = NSUserDefaults.standardUserDefaults()
         if let peerIDData = defaults.dataForKey(kPeerIDKey) {
-        peerId = NSKeyedUnarchiver.unarchiveObjectWithData(peerIDData) as! MCPeerID
-        print("peerID: \(peerId)")
+            peerId = NSKeyedUnarchiver.unarchiveObjectWithData(peerIDData) as! MCPeerID
+            print("peerID: \(peerId)")
         } else {
-        peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
-        print("peerID: \(peerId)")
-        let peerIDData = NSKeyedArchiver.archivedDataWithRootObject(peerId)
-        defaults.setObject(peerIDData, forKey: kPeerIDKey)
-        defaults.synchronize()
+            peerId = MCPeerID(displayName: NSHost.currentHost().localizedName!)
+            print("peerID: \(peerId)")
+            let peerIDData = NSKeyedArchiver.archivedDataWithRootObject(peerId)
+            defaults.setObject(peerIDData, forKey: kPeerIDKey)
+            defaults.synchronize()
         }
         
         self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: peerId, discoveryInfo: nil, serviceType: GameServiceType)
@@ -56,7 +58,7 @@ class ServiceManager : NSObject {
         let session = MCSession(peer: self.peerId, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.Required)
         session.delegate = self
         return session
-        }()
+    }()
     
 }
 
@@ -68,9 +70,9 @@ extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
     func advertiser(advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: NSData?, invitationHandler: (Bool, MCSession) -> Void) {
         print("didReceiveInvitationFromPeer: \(peerID)")
         
-             //NSNotificationCenter.defaultCenter().postNotificationName(kAddPeerInviteNK, object: self, userInfo: ["peerId": peerID.displayName])
+        //NSNotificationCenter.defaultCenter().postNotificationName(kAddPeerInviteNK, object: self, userInfo: ["peerId": peerID.displayName])
         
-            invitationHandler(true, self.session)
+        invitationHandler(true, self.session)
     }
 }
 
@@ -95,19 +97,16 @@ extension ServiceManager : MCSessionDelegate {
             let newPeer = Peer(peerID: peerID)
             
             if ConnectedPeers.dict.count == 0 {
-             ConnectedPeers.firstConnectionPeerID = peerID
+                ConnectedPeers.firstConnectionPeerID = peerID
             }
             
             if ConnectedPeers.dict.count == 1 {
                 ConnectedPeers.secondConnectionPeerID = peerID
             }
             
-            ConnectedPeers.dict.setObject(newPeer, forKey: peerID)
+            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.addPeerInvite, object: self, userInfo: ["peerID": peerID])
             
-            if ConnectedPeers.dict.count == 2 {
-                print("connectedPeersDict: \(ConnectedPeers.dict)")
-            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.switchToGameView, object: self, userInfo: nil)
-            }
+            ConnectedPeers.dict.setObject(newPeer, forKey: peerID)
         }
     }
     
@@ -120,16 +119,45 @@ extension ServiceManager : MCSessionDelegate {
     }
     
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
-        // Send notification to GameControllerView that controls have been sent
-        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerControls, object: self, userInfo: ["strokeInfo": data, "peerID": peerID])
+        // First check what message was sent
+        let receivedObject = NSKeyedUnarchiver.unarchiveObjectWithData(data)
         
+        if let unarchivedData = receivedObject {
+            if unarchivedData.isKindOfClass(NSString) {
+                NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateReadyStatus, object: self, userInfo: ["peerID": peerID])
+            }
+        } else {
+        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerControls, object: self, userInfo: ["strokeInfo": data, "peerID": peerID])
+        }
     }
     
     func session(session: MCSession, didReceiveStream stream: NSInputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         print("peer \(peerID) didReceiveStream, with name: \(streamName)")
+        
+        var buffer = [UInt8](count: 8, repeatedValue: 0)
+        inputStream = stream
+        inputStream!.delegate = self
+        inputStream!.scheduleInRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        inputStream!.open()
+        
+        if inputStream!.hasBytesAvailable {
+            let result: Int = stream.read(&buffer, maxLength: buffer.count)
+        }
     }
     
     func session(session: MCSession, didReceiveCertificate certificate: [AnyObject]?, fromPeer peerID: MCPeerID, certificateHandler: (Bool) -> Void) {
         certificateHandler(true)
+    }
+}
+
+extension ServiceManager : NSStreamDelegate
+{
+    func stream(aStream: NSStream, handleEvent eventCode: NSStreamEvent) {
+        switch eventCode {
+        case NSStreamEvent.HasBytesAvailable:
+            var buffer = [UInt8](count: 4096, repeatedValue: 0)
+            var output: NSData = NSData.init(bytes: &buffer, length: buffer.count)
+        default: break
+        }
     }
 }

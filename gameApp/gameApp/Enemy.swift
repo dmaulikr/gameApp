@@ -22,9 +22,11 @@ class Enemy: SCNNode {
     var speed: CGFloat!
     var panicDistance: CGFloat!
     var viewDistance: CGFloat!
+    var fieldOfView: Double!
     var stateMachine: AIStateMachine<Enemy>?
     var steer: SteeringBehaviors!
-    var target: Player!
+    var targets = [Player]()
+    var currentTarget: Player?
     var levelNode: SCNNode!
     var oldRotation: SCNMatrix4!
     var dead: Bool!
@@ -41,6 +43,8 @@ class Enemy: SCNNode {
         dead = false
         currentMovementDirection = SCNVector3Make(0, 0, 0)
         state = State.wander
+        fieldOfView = M_PI
+        viewDistance = 200
     }
     
     required init?(coder: NSCoder) {
@@ -50,13 +54,11 @@ class Enemy: SCNNode {
     func update() {
         
         if dead == false {
-            
+            self.updateCurrentTarget()
             self.updateState()
             self.performRotation()
             self.performMovement()
-            
         } else {
-            // DEAD
             self.physicsBody?.angularVelocityFactor = SCNVector3Make(1.0, 1.0, 0.0)
             self.physicsBody?.applyTorque(SCNVector4Make(-1,0,0, CGFloat(M_PI_2)), impulse: true)
             let fadeOut = SCNAction.fadeOutWithDuration(1.0)
@@ -66,31 +68,76 @@ class Enemy: SCNNode {
         }
     }
     
-    func updateState() {
-        let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.target.presentationNode.position)
+    func facingDirection() -> SCNVector3 {
+        let facingPoint = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: 10), fromNode: self.presentationNode)
+        let facingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: facingPoint)
+        return VectorMath.getNormalizedVector(facingDirection)
+    }
+    
+    func inFieldOfView(node: Player) -> Bool
+    {
+        let facingDirection = self.facingDirection()
+        
+        let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: node.presentationNode.position)
         let distance = VectorMath.getVectorMagnitude(toTarget)
         
-        switch(distance) {
-        case 0..<self.panicDistance:
-            self.state = State.flee
-        case self.panicDistance..<75:
-            self.state = State.arrive
-        default:
+        if VectorMath.dotProduct(facingDirection, right: toTarget) >= 0
+        {
+            if distance < self.viewDistance {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
+    }
+    
+    func updateCurrentTarget() {
+        //var closestTarget = targets[0] // automatically
+        // Not adding closestTarget will cause BAD_ACCESS_EXC
+        var closestTarget: Player?
+        var closestDistance = self.viewDistance+1
+        for target in self.targets {
+            if inFieldOfView(target) {
+                let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: target.presentationNode.position)
+                let distance = VectorMath.getVectorMagnitude(toTarget)
+                if distance < closestDistance {
+                    closestDistance = distance
+                    closestTarget = target
+                }
+            }
+        }
+        currentTarget = closestTarget
+    }
+    
+    func updateState() {
+        if let currTarget = currentTarget {
+            let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: currTarget.presentationNode.position)
+            let distance = VectorMath.getVectorMagnitude(toTarget)
+            
+            switch(distance) {
+            case 0..<self.panicDistance:
+                self.state = State.flee
+            case self.panicDistance..<self.viewDistance+1:
+                self.state = State.arrive
+            default:
+                self.state = State.wander
+            }
+        } else {
             self.state = State.wander
         }
     }
     
     func performMovement() {
-        let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.target.presentationNode.position)
-        let distance = VectorMath.getVectorMagnitude(toTarget)
         
         switch(self.state) {
         case State.flee:
-            var fleeForce = self.steer.flee(target.presentationNode.position)
+            var fleeForce = self.steer.flee(currentTarget!.presentationNode.position)
             fleeForce = VectorMath.getNormalizedVector(fleeForce)
             self.physicsBody?.applyForce(fleeForce, impulse: true)
         case State.arrive:
-            var arriveForce = self.steer.arrive(target.presentationNode.position)
+            var arriveForce = self.steer.arrive(currentTarget!.presentationNode.position)
             if arriveForce.x > 0 || arriveForce.y > 0 {
                 arriveForce = VectorMath.getNormalizedVector(arriveForce)
                 arriveForce = VectorMath.multiplyVectorByScalar(arriveForce, right: 0.8)
@@ -109,9 +156,7 @@ class Enemy: SCNNode {
     
     func performRotation() {
         // 1 Determine which way the object is facing
-        let facingPoint = self.levelNode.convertPosition(SCNVector3(x: 0, y: 0, z: 10), fromNode: self.presentationNode)
-        var facingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: facingPoint)
-        facingDirection = VectorMath.getNormalizedVector(facingDirection)
+        let facingDirection = self.facingDirection()
         
         // 2 Determine which way the object should be facing
         var shouldBeFacingDirection: SCNVector3
@@ -120,7 +165,7 @@ class Enemy: SCNNode {
             shouldBeFacingDirection = VectorMath.getNormalizedVector((self.physicsBody?.velocity)!)
         } else {
             // otherwise should be facing player
-            shouldBeFacingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.target.presentationNode.position)
+            shouldBeFacingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: currentTarget!.presentationNode.position)
             shouldBeFacingDirection = VectorMath.getNormalizedVector(shouldBeFacingDirection)
         }
         
@@ -134,11 +179,12 @@ class Enemy: SCNNode {
         
         // 5 Rotate object about rotationAxis by rotationAngle
         if VectorMath.radiansToDegrees(rotationAngle) > 10 {
-            if rotationAxis.y < 0 {
-                self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
-            } else  {
-                self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
-            }
+            self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
+            //if rotationAxis.y < 0 {
+              //  self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
+           // } else  {
+             //   self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
+           // }
         } else {
             self.physicsBody?.clearAllForces()
         }

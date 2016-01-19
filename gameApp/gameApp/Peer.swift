@@ -12,9 +12,11 @@ import MultipeerConnectivity
 class Peer: NSObject {
     var player: Player?
     let mcPeerID: MCPeerID!
+    var hud: HUD?
     
     init(peerID: MCPeerID) {
         self.mcPeerID = peerID
         super.init()
+        
     }
 }

@@ -14,5 +14,8 @@ struct Constants {
         static let switchToGameView = "elg-switchToGameView"
         static let playerControls = "elg-playerControls"
         static let updateHealth = "elg-updateHealth"
+        static let updateAmmo = "elg-updateAmmo"
+        static let updateReadyStatus = "elg-updateReadyStatus"
+        static let updateHUD = "elg-updateHUD"
     }
 }

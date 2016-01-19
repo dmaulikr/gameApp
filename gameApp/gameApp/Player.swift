@@ -62,7 +62,7 @@ class Player: SCNNode {
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
-        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy | ColliderType.Player | ColliderType.PlayerBullet
+        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy | ColliderType.Player
         self.physicsBody?.friction = 0.7
         self.physicsBody?.restitution = 0 // does not bounce during collisions
         
@@ -198,7 +198,7 @@ class Player: SCNNode {
         self.runAction(gruntAction)
         
         // Send notification to HUD to subtract health.
-        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHealth, object: self, userInfo: ["newHealth": self.health])
+        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "health": self.health])
     }
     
     func playerAttack() {
@@ -225,6 +225,10 @@ class Player: SCNNode {
         let forwardMovementDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: forwardFacingSceneCoordinates)
         
         return forwardMovementDirection
+    }
+    
+    func reloadWeapon() {
+        self.equippedWeapon?.reload()
     }
     
     func ownCameraNode() -> Camera {

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		6E15DCD51C433BC80082BD3C /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E15DCD41C433BC80082BD3C /* Peer.swift */; };
 		6E62A2301C1D88A20089E9CC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E62A22F1C1D88A20089E9CC /* Constants.swift */; };
+		6EA02A281C4C35DA00D9EAC7 /* TableCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6EA02A271C4C35DA00D9EAC7 /* TableCellView.xib */; };
+		6EA02A2A1C4C36FB00D9EAC7 /* TableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */; };
 		6EB9FAA41C25A124009EC9D6 /* level2.scn in Resources */ = {isa = PBXBuildFile; fileRef = 6EB9FAA31C25A124009EC9D6 /* level2.scn */; };
 		9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2059FE1BCAF6A200A66DC2 /* Player.swift */; };
 		9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205A001BCAFA1000A66DC2 /* Camera.swift */; };
@@ -57,6 +59,8 @@
 /* Begin PBXFileReference section */
 		6E15DCD41C433BC80082BD3C /* Peer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
 		6E62A22F1C1D88A20089E9CC /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		6EA02A271C4C35DA00D9EAC7 /* TableCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TableCellView.xib; sourceTree = "<group>"; };
+		6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableCellView.swift; sourceTree = "<group>"; };
 		6EB9FAA31C25A124009EC9D6 /* level2.scn */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = level2.scn; sourceTree = "<group>"; };
 		9E2059FE1BCAF6A200A66DC2 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		9E205A001BCAFA1000A66DC2 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 				9E2059FE1BCAF6A200A66DC2 /* Player.swift */,
 				6E15DCD41C433BC80082BD3C /* Peer.swift */,
 				9EB5ACD91BD69F3700332B59 /* Weapon.swift */,
+				6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */,
 				9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */,
 				9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */,
 				9EB5ACDF1BD6BE3900332B59 /* Enemy.swift */,
@@ -164,6 +169,7 @@
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
+				6EA02A271C4C35DA00D9EAC7 /* TableCellView.xib */,
 				9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */,
 				9E230F1A1BB07F100046CC4E /* Info.plist */,
 			);
@@ -297,6 +303,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6EA02A281C4C35DA00D9EAC7 /* TableCellView.xib in Resources */,
 				6EB9FAA41C25A124009EC9D6 /* level2.scn in Resources */,
 				9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */,
 				9E230F161BB07F100046CC4E /* Assets.xcassets in Resources */,
@@ -339,6 +346,7 @@
 				6E15DCD51C433BC80082BD3C /* Peer.swift in Sources */,
 				9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */,
 				9E205A031BCB73A100A66DC2 /* HUD.swift in Sources */,
+				6EA02A2A1C4C36FB00D9EAC7 /* TableCellView.swift in Sources */,
 				9EAFA0DE1BE84A4D00B77A13 /* VectorMath.swift in Sources */,
 				9EB5ACE01BD6BE3900332B59 /* Enemy.swift in Sources */,
 				9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */,

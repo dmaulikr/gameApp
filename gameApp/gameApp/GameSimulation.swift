@@ -36,6 +36,7 @@ struct Keystroke {
         case Crouch
         case Attack
         case Interact
+        case Reload
     }
     
     var interactionType: InteractionType?
@@ -102,7 +103,8 @@ class GameSimulation: SCNScene {
             case .Camera:
                 switch strokeInfo.gestureType! {
                 case .Tap:
-                    gameLevel.jump(peer.player!.id!)
+                    break
+                    //gameLevel.jump(peer.player!.id!)
                 case .Pan:
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
@@ -119,11 +121,11 @@ class GameSimulation: SCNScene {
             case .Crouch:
                 print("the button event was crouch")
             case .Attack:
-                
                 gameLevel.playerAttack(peer.player!.id!)
-                
             case .Interact:
                 print ("the button event was interact")
+            case .Reload:
+                gameLevel.playerReloadWeapon(peer.player!.id!)
             }
         }
     }

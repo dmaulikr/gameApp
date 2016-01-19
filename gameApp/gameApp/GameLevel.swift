@@ -99,7 +99,7 @@ class GameLevel: NSObject {
         player2Weapon.owner = player2
         
         // Setup Enemy
-        enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), target: player1, levelNode: levelNode)
+        enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
         levelNode.addChildNode(enemy2)
         
         let spotLight = SCNLight()
@@ -166,5 +166,9 @@ class GameLevel: NSObject {
     
     func jump(playerID: Player.ID) {
         (playerDict.objectForKey(playerID.hashValue) as! Player).jump()
+    }
+    
+    func playerReloadWeapon(playerID: Player.ID) {
+        (playerDict.objectForKey(playerID.hashValue) as! Player).reloadWeapon()
     }
 }

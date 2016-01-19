@@ -11,14 +11,14 @@ import SceneKit
 
 class EnemyFactory: NSObject {
     
-    static func createCombatAndroid(position: SCNVector3, target: Player, levelNode: SCNNode) -> Enemy {
+    static func createCombatAndroid(position: SCNVector3, targets: [Player], levelNode: SCNNode) -> Enemy {
         let android = Enemy()
         android.health = 100
         android.damage = 20
         android.speed = 0.4
         android.panicDistance = 20
         android.viewDistance = 50
-        android.target = target
+        android.targets = targets
         android.levelNode = levelNode
         
         android.position = position
@@ -44,14 +44,14 @@ class EnemyFactory: NSObject {
         return android
     }
     
-    static func createRobbieRabit(position: SCNVector3, target: Player, levelNode: SCNNode) -> Enemy {
+    static func createRobbieRabit(position: SCNVector3, targets: [Player], levelNode: SCNNode) -> Enemy {
         let robbie = Enemy()
         robbie.health = 100
         robbie.damage = 20
         robbie.speed = 0.4
         robbie.panicDistance = 25
         robbie.viewDistance = 50
-        robbie.target = target
+        robbie.targets = targets
         robbie.levelNode = levelNode
         
         // Get model
