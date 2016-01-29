@@ -11,39 +11,6 @@ import SceneKit
 
 class EnemyFactory: NSObject {
     
-    static func createCombatAndroid(position: SCNVector3, targets: [Player], levelNode: SCNNode) -> Enemy {
-        let android = Enemy()
-        android.health = 100
-        android.damage = 20
-        android.speed = 0.4
-        android.panicDistance = 20
-        android.viewDistance = 50
-        android.targets = targets
-        android.levelNode = levelNode
-        
-        android.position = position
-        
-        // Get model
-        let weaponScene = SCNScene(named: "art.scnassets/Combat_Android/Combat_Android.dae")
-        let nodeArray = weaponScene!.rootNode.childNodes
-        
-        for childNode in nodeArray {
-            
-            // Add model as child node
-            childNode.physicsBody = nil;
-            childNode.scale = SCNVector3Make(5, 5, 5)
-            childNode.rotation = SCNVector4Make(-1, 0, 0, CGFloat(M_PI_2))
-            android.addChildNode(childNode)
-        }
-        let shape = SCNPhysicsShape(node: android, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
-        //android.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
-        android.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
-        android.physicsBody?.categoryBitMask = ColliderType.Enemy
-        android.physicsBody?.collisionBitMask = ColliderType.PlayerBullet | ColliderType.Ground | ColliderType.Weapon | ColliderType.Wall | ColliderType.Player
-        android.physicsBody?.contactTestBitMask = ColliderType.PlayerBullet | ColliderType.Player
-        return android
-    }
-    
     static func createRobbieRabit(position: SCNVector3, targets: [Player], levelNode: SCNNode) -> Enemy {
         let robbie = Enemy()
         robbie.health = 100
@@ -83,4 +50,51 @@ class EnemyFactory: NSObject {
         
         return robbie
     }
+    
+    static func createLambentMale(position: SCNVector3, targets: [Player], levelNode: SCNNode) -> Enemy {
+        let lambentM = Enemy()
+        lambentM.health = 100
+        lambentM.damage = 10
+        lambentM.speed = 0.4
+        lambentM.panicDistance = 25
+        lambentM.viewDistance = 50
+        lambentM.targets = targets
+        lambentM.levelNode = levelNode
+        
+        lambentM.playerDetectedAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/monster_snarl.mp3")
+        lambentM.attackedAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/zombieAttacked.mp3")
+        lambentM.dyingAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/zombieDying.mp3")
+        
+        // Get model
+        let lambentMScene = SCNScene(named: "art.scnassets/Lambent_Male/Lambent_Male.dae")
+        let nodeArray = lambentMScene!.rootNode.childNodes
+        
+        for childNode in nodeArray {
+            // Add model as child node
+            childNode.physicsBody = nil
+            childNode.scale = SCNVector3Make(5, 5, 5)
+            childNode.rotation = SCNVector4Make(-1, 0, 0, CGFloat(M_PI_2))
+            lambentM.addChildNode(childNode)
+        }
+        
+        // Set textures"
+        lambentM.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Lambent_Male/Lambent_Male_D.tga"
+        lambentM.geometry?.firstMaterial?.specular.contents = "art.scnassets/Lambent_Male/Lambent_Male_S.tga"
+        lambentM.geometry?.firstMaterial?.normal.contents = "art.scnassets/Lambent_Male/Lambent_Male_N.tga"
+        lambentM.geometry?.firstMaterial?.emission.contents = "art.scnassets/Lambent_Male/Lambent_Male_E.tga"
+        
+        //let shape = SCNPhysicsShape(node: robbie, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConcavePolyhedron, SCNPhysicsShapeKeepAsCompoundKey: false]);
+        lambentM.position = position
+        lambentM.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: nil)
+        lambentM.physicsBody?.categoryBitMask = ColliderType.Enemy
+        lambentM.physicsBody?.collisionBitMask =  ColliderType.Ground | ColliderType.Wall | ColliderType.Player | ColliderType.Weapon
+        lambentM.physicsBody?.contactTestBitMask = ColliderType.PlayerBullet | ColliderType.Player | ColliderType.Weapon
+        lambentM.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
+        lambentM.physicsBody?.angularDamping = 0.9
+        lambentM.physicsBody?.damping = 0.9
+        lambentM.physicsBody?.restitution = 0
+        
+        return lambentM
+    }
+
 }

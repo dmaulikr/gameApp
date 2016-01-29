@@ -17,6 +17,8 @@ struct ColliderType {
     static let PlayerBullet = 0x1 << 4 // 16
     static let Wall = 0x1 << 5 // 32
     static let EnemyBullet = 0x1 << 6 // 64
+    static let InventoryItem = 0x1 << 7 // 128
+    static let WorldItem = 0x1 << 8 // 256
 }
 
 struct Keystroke {
@@ -165,14 +167,14 @@ extension GameSimulation : SCNPhysicsContactDelegate {
                 let player = contact.nodeB as! Player
                 if player.startedEnemyContact == false {
                     player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(player.id!, damage: enemy.damage)
+                    gameLevel.damagePlayer(player.id!, enemy: enemy)
                 }
             } else {
                 let enemy = contact.nodeB as! Enemy
                 let player = contact.nodeA as! Player
                 if player.startedEnemyContact == false {
                     player.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(player.id!, damage: enemy.damage)
+                    gameLevel.damagePlayer(player.id!, enemy: enemy)
                 }
             }
         case ColliderType.Enemy | ColliderType.Weapon:
@@ -181,25 +183,21 @@ extension GameSimulation : SCNPhysicsContactDelegate {
                 let weapon = contact.nodeB as! Weapon
                 if weapon.startedEnemyContact == false {
                     weapon.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(weapon.owner!.id!, damage: enemy.damage)
+                    gameLevel.damagePlayer(weapon.owner!.id!, enemy: enemy)
                 }
             } else {
                 let enemy = contact.nodeB as! Enemy
                 let weapon = contact.nodeA as! Weapon
                 if weapon.startedEnemyContact == false {
                     weapon.startedEnemyContact = true
-                    gameLevel.subtractPlayerHealth(weapon.owner!.id!, damage: enemy.damage)
+                    gameLevel.damagePlayer(weapon.owner!.id!, enemy: enemy)
                 }
             }
-            
-        case ColliderType.Player | ColliderType.EnemyBullet:
-            break;
-            // calculate the damage to the player
         case ColliderType.PlayerBullet | ColliderType.Enemy:
             if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.PlayerBullet {
                 let bullet = contact.nodeA
                 if bullet.parentNode != nil {
-                    gameLevel.subtractEnemyHealth()
+                    gameLevel.damageEnemy()
                 }
                 bullet.geometry?.firstMaterial?.normal.contents = nil
                 bullet.geometry?.firstMaterial?.diffuse.contents = nil
@@ -207,16 +205,23 @@ extension GameSimulation : SCNPhysicsContactDelegate {
             } else {
                 let bullet = contact.nodeB
                 if bullet.parentNode != nil {
-                    gameLevel.subtractEnemyHealth()
+                    gameLevel.damageEnemy()
                 }
                 bullet.geometry?.firstMaterial?.normal.contents = nil
                 bullet.geometry?.firstMaterial?.diffuse.contents = nil
                 bullet.removeFromParentNode()
             }
-        case ColliderType.PlayerBullet | ColliderType.Ground:
-            break
-        case ColliderType.Wall | ColliderType.Weapon:
-            print("collision between wall and weapon")
+        case ColliderType.InventoryItem | ColliderType.Player:
+            // Check inventory item type
+            if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.InventoryItem {
+                let inventoryItem = contact.nodeA as! InventoryItem
+                let player = contact.nodeB as! Player
+                gameLevel.inventoryBoosterForPlayer(player.id!, inventoryItem: inventoryItem)
+            } else {
+                let player = contact.nodeA as! Player
+                let inventoryItem = contact.nodeB as! InventoryItem
+                gameLevel.inventoryBoosterForPlayer(player.id!, inventoryItem: inventoryItem)
+            }
         default: break
         }
         

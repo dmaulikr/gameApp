@@ -15,6 +15,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         // Insert code here to initialize your application
+        
+        // Make full screen
+        //let mainDisplayRect = NSScreen.mainScreen()?.frame
+        //var fullScreenWindow = window.frameRectForContentRect(mainDisplayRect!)
+        //window.level = .NSMainMenuWindowLevel
     }
     
 }

@@ -16,21 +16,21 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="Hz6-mo-xeY">
-            <rect key="frame" x="0.0" y="0.0" width="1250" height="700"/>
+            <rect key="frame" x="0.0" y="0.0" width="1350" height="800"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <sceneView identifier="GameViewController" translatesAutoresizingMaskIntoConstraints="NO" id="3hf-qJ-gKv">
-                    <rect key="frame" x="0.0" y="353" width="1250" height="347"/>
-                </sceneView>
                 <sceneView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mWO-Jq-nz1">
-                    <rect key="frame" x="0.0" y="0.0" width="1250" height="345"/>
+                    <rect key="frame" x="150" y="0.0" width="1060" height="380"/>
+                </sceneView>
+                <sceneView identifier="GameViewController" translatesAutoresizingMaskIntoConstraints="NO" id="3hf-qJ-gKv">
+                    <rect key="frame" x="150" y="379" width="1060" height="380"/>
                 </sceneView>
             </subviews>
             <constraints>
-                <constraint firstAttribute="trailing" secondItem="3hf-qJ-gKv" secondAttribute="trailing" id="B6a-f2-1ra"/>
-                <constraint firstItem="3hf-qJ-gKv" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" id="dnf-LI-Tay"/>
-                <constraint firstAttribute="bottom" secondItem="3hf-qJ-gKv" secondAttribute="bottom" constant="353" id="nHK-MU-sdu"/>
-                <constraint firstItem="3hf-qJ-gKv" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" id="wnU-P2-p0E"/>
+                <constraint firstAttribute="trailing" secondItem="3hf-qJ-gKv" secondAttribute="trailing" constant="140" id="B6a-f2-1ra"/>
+                <constraint firstItem="3hf-qJ-gKv" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="150" id="dnf-LI-Tay"/>
+                <constraint firstAttribute="bottom" secondItem="3hf-qJ-gKv" secondAttribute="bottom" constant="379" id="nHK-MU-sdu"/>
+                <constraint firstItem="3hf-qJ-gKv" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="41" id="wnU-P2-p0E"/>
             </constraints>
             <point key="canvasLocation" x="-131" y="190"/>
         </customView>

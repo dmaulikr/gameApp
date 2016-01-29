@@ -28,11 +28,11 @@ class GameLevel: NSObject {
     
     func createLevel(parentScene: SCNScene) -> SCNNode {
         
-        //parentScene.background.contents = "art.scnassets/skybox01_cube.png"
+        parentScene.background.contents = "art.scnassets/Textures/skybox01_cube.png"
         
         levelNode = SCNNode()
         
-        let levelScene = SCNScene(named: "art.scnassets/level.scn")
+        let levelScene = SCNScene(named: "art.scnassets/Levels/level2.scn")
         let nodeArray = levelScene!.rootNode.childNodes
         
         for childNode in nodeArray {
@@ -40,19 +40,25 @@ class GameLevel: NSObject {
             // Add model as child node
             if childNode.name == "floor" {
                 let floorGeometry = SCNFloor()
+                floorGeometry.reflectivity = 0
                 let shape = SCNPhysicsShape(geometry: floorGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
                 childNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
                 childNode.physicsBody?.categoryBitMask = ColliderType.Ground
-                childNode.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy
+                childNode.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy | ColliderType.InventoryItem | ColliderType.WorldItem
+                childNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Textures/SoilMud0010_1_S.jpg"
+                childNode.geometry?.firstMaterial?.diffuse.contentsTransform = SCNMatrix4MakeScale(1.5, 1.5, 1.5)
+                childNode.geometry?.firstMaterial?.shininess = 0
             }
             
             if childNode.name == "wall" {
-                let wallGeometry = SCNBox(width: 100, height: 60, length: 15, chamferRadius: 1)
+                let wallGeometry = SCNBox(width: 200, height: 60, length: 30, chamferRadius: 1)
                 let shape = SCNPhysicsShape(geometry: wallGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
                 childNode.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
                 childNode.physicsBody?.categoryBitMask = ColliderType.Wall
                 childNode.physicsBody?.collisionBitMask = ColliderType.Weapon | ColliderType.Player | ColliderType.Enemy | ColliderType.PlayerBullet
+                childNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Textures/ConcreteMossy0042_1_S.jpg"
             }
+            
             levelNode.addChildNode(childNode)
         }
         
@@ -98,20 +104,33 @@ class GameLevel: NSObject {
         player2.equippedWeapon = player2Weapon
         player2Weapon.owner = player2
         
+        // Setup water bottle
+        let waterBottle = InventoryItemFactory.createWaterBottle(SCNVector3Make(0, 0, -100))
+        levelNode.addChildNode(waterBottle)
+        
+        // Setup ammo box
+        let ammoBox = InventoryItemFactory.createAmmoBox(SCNVector3Make(0, 0, 0))
+        levelNode.addChildNode(ammoBox)
+        
+        // Setup sedan
+        let sedan = WorldItemFactory.createSedan(SCNVector3Make(-200, 0, 0))
+        levelNode.addChildNode(sedan)
+        
         // Setup Enemy
-        enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
+        //enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
+        enemy2 = EnemyFactory.createLambentMale(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
         levelNode.addChildNode(enemy2)
         
-        let spotLight = SCNLight()
-        spotLight.type = SCNLightTypeSpot
-        spotLight.castsShadow = true
-        spotLight.zFar = 10
-        light = SCNNode()
-        light.light = spotLight
-        light.position = SCNVector3(x: 0, y: 15, z: 5)
-        let constraint = SCNLookAtConstraint(target: player1Weapon)
-        light.constraints = [constraint]
-        player1Camera.addChildNode(light)
+        //        let spotLight = SCNLight()
+        //        spotLight.type = SCNLightTypeSpot
+        //        spotLight.castsShadow = true
+        //        spotLight.zFar = 10
+        //        light = SCNNode()
+        //        light.light = spotLight
+        //        light.position = SCNVector3(x: 0, y: 15, z: 5)
+        //        let constraint = SCNLookAtConstraint(target: player1Weapon)
+        //        light.constraints = [constraint]
+        //        player1Camera.addChildNode(light)
         
         levelNode.addChildNode(player1)
         levelNode.addChildNode(player2)
@@ -142,13 +161,8 @@ class GameLevel: NSObject {
         (playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).updateCrosshairAim()
     }
     
-    func subtractEnemyHealth() {
-        if enemy2.dead == false {
-            enemy2.health = enemy2.health - ((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).equippedWeapon!.baseDamage!+((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).damage))
-            if enemy2.health <= 0 {
-                enemy2.dead = true
-            }
-        }
+    func damageEnemy() {
+        enemy2.applyDamage((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).equippedWeapon!.baseDamage!+((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).damage))
     }
     
     func updateEnemy() {
@@ -160,8 +174,14 @@ class GameLevel: NSObject {
         (playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).updatePlayerTransform()
     }
     
-    func subtractPlayerHealth(playerID: Player.ID, damage: CGFloat) {
+    func damagePlayer(playerID: Player.ID, enemy: Enemy) {
+        // Calculate damage level
+        let damage = Int(arc4random_uniform(UInt32(enemy.damage)))
         (playerDict.objectForKey(playerID.hashValue) as! Player).subtractPlayerHealth(damage)
+    }
+    
+    func inventoryBoosterForPlayer(playerID: Player.ID, inventoryItem: InventoryItem) {
+        (playerDict.objectForKey(playerID.hashValue) as! Player).equipBooster(inventoryItem)
     }
     
     func jump(playerID: Player.ID) {

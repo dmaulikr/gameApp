@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+ <asset>
+  <contributor>
+   <authoring_tool>SceneKit Collada Exporter v1.0</authoring_tool>
+  </contributor>
+  <created>2016-01-21T20:51:29Z</created>
+  <modified>2016-01-21T20:51:29Z</modified>
+  <unit meter="0.010000"/>
+  <up_axis>Y_UP</up_axis>
+ </asset>
+ <library_images>
+  <image id="image1">
+   <init_from>low_poly_grass2.png</init_from>
+  </image>
+  <image id="image2">
+   <init_from>low_poly_grass_specular.png</init_from>
+  </image>
+  <image id="image3">
+   <init_from>low_poly_grass_opacity.png</init_from>
+  </image>
+  <image id="image4">
+   <init_from>low_poly_grass_normal.png</init_from>
+  </image>
+ </library_images>
+ <library_materials>
+  <material id="material" name="material">
+   <instance_effect url="#effect_material"/>
+  </material>
+ </library_materials>
+ <library_effects>
+  <effect id="effect_material">
+   <profile_COMMON>
+    <newparam sid="ID5_image1_surface">
+     <surface type="2D">
+      <init_from>image1</init_from>
+     </surface>
+    </newparam>
+    <newparam sid="ID5_image1">
+     <sampler2D>
+      <source>ID5_image1_surface</source>
+      <wrap_s>WRAP</wrap_s>
+      <wrap_t>WRAP</wrap_t>
+      <minfilter>LINEAR</minfilter>
+      <magfilter>LINEAR</magfilter>
+      <mipfilter>LINEAR</mipfilter>
+     </sampler2D>
+    </newparam>
+    <newparam sid="ID6_image2_surface">
+     <surface type="2D">
+      <init_from>image2</init_from>
+     </surface>
+    </newparam>
+    <newparam sid="ID6_image2">
+     <sampler2D>
+      <source>ID6_image2_surface</source>
+      <wrap_s>WRAP</wrap_s>
+      <wrap_t>WRAP</wrap_t>
+      <minfilter>LINEAR</minfilter>
+      <magfilter>LINEAR</magfilter>
+      <mipfilter>LINEAR</mipfilter>
+     </sampler2D>
+    </newparam>
+    <newparam sid="ID7_image3_surface">
+     <surface type="2D">
+      <init_from>image3</init_from>
+     </surface>
+    </newparam>
+    <newparam sid="ID7_image3">
+     <sampler2D>
+      <source>ID7_image3_surface</source>
+      <wrap_s>WRAP</wrap_s>
+      <wrap_t>WRAP</wrap_t>
+      <minfilter>LINEAR</minfilter>
+      <magfilter>LINEAR</magfilter>
+      <mipfilter>LINEAR</mipfilter>
+     </sampler2D>
+    </newparam>
+    <newparam sid="ID8_image4_surface">
+     <surface type="2D">
+      <init_from>image4</init_from>
+     </surface>
+    </newparam>
+    <newparam sid="ID8_image4">
+     <sampler2D>
+      <source>ID8_image4_surface</source>
+      <wrap_s>WRAP</wrap_s>
+      <wrap_t>WRAP</wrap_t>
+      <minfilter>LINEAR</minfilter>
+      <magfilter>LINEAR</magfilter>
+      <mipfilter>LINEAR</mipfilter>
+     </sampler2D>
+    </newparam>
+    <technique sid="common">
+     <blinn>
+      <ambient>
+       <color>0.2 0.2 0.2 1</color>
+      </ambient>
+      <diffuse>
+       <texture texture="ID5_image1" texcoord="CHANNEL2"/>
+      </diffuse>
+      <specular>
+       <texture texture="ID6_image2" texcoord="CHANNEL3"/>
+      </specular>
+      <shininess>
+       <float>0.022516</float>
+      </shininess>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <texture texture="ID7_image3" texcoord="CHANNEL5"/>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </blinn>
+     <extra>
+      <technique profile="SceneKit">
+       <bump>
+        <texture texture="ID8_image4" texcoord="CHANNEL7"/>
+       </bump>
+      </technique>
+     </extra>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+ </library_effects>
+ <library_geometries>
+  <geometry id="grass_2_0-lib" name="grass_2_0Mesh">
+   <mesh>
+    <source id="grass_2_0-POSITION">
+     <float_array id="ID9-array" count="72">-1.5 -0.037186 -0 -0 -0.037186 -0 -0 2.96281 -0 -0 2.96281 -0 -1.5 2.18617 -0 -1.5 -0.037186 -0 -0.890934 -0.037186 -1.20675 -0 -0.037186 -0 -0 2.96281 -0 -0 2.96281 -0 -0.890934 2.18617 -1.20675 -0.890934 -0.037186 -1.20675 1.5 -0.037186 -0 1.5 2.18617 0 -0 2.96281 -0 -0 2.96281 -0 -0 -0.037186 -0 1.5 -0.037186 -0 0.890934 -0.037186 1.20675 0.890933 2.18617 1.20675 -0 2.96281 -0 -0 2.96281 -0 -0 -0.037186 -0 0.890934 -0.037186 1.20675 </float_array>
+     <technique_common>
+      <accessor source="#ID9-array" count="24" stride="3">
+       <param name="X" type="float"/>
+       <param name="Y" type="float"/>
+       <param name="Z" type="float"/>
+      </accessor>
+     </technique_common>
+    </source>
+    <source id="grass_2_0-Normal0">
+     <float_array id="ID10-array" count="72">-0 0 1 0 0 1 -0.45058 -0 0.892736 -0.45058 -0 0.892736 -0 0 1 -0 0 1 -0.804498 -0 0.593956 -0.804498 0 0.593956 -0.45058 -0 0.892736 -0.45058 -0 0.892736 -0.804498 -0 0.593956 -0.804498 -0 0.593956 -0 -0 1 -0 -0 1 -0.45058 -0 0.892736 -0.45058 -0 0.892736 0 0 1 -0 -0 1 -0.804498 -0 0.593956 -0.804498 -0 0.593955 -0.45058 -0 0.892736 -0.45058 -0 0.892736 -0.804498 0 0.593956 -0.804498 -0 0.593956 </float_array>
+     <technique_common>
+      <accessor source="#ID10-array" count="24" stride="3">
+       <param name="X" type="float"/>
+       <param name="Y" type="float"/>
+       <param name="Z" type="float"/>
+      </accessor>
+     </technique_common>
+    </source>
+    <source id="grass_2_0-UV0">
+     <float_array id="ID11-array" count="48">0.002981 0.00307 0.49932 0.00307 0.49932 0.992558 0.49932 0.992558 0.002982 0.992559 0.002981 0.00307 0.00403 0.004071 0.500018 0.004071 0.500018 0.993559 0.500018 0.993559 0.00403 0.993559 0.00403 0.004071 0.995659 0.00307 0.995659 0.992558 0.49932 0.992558 0.49932 0.992558 0.49932 0.00307 0.995659 0.00307 0.996006 0.004071 0.996007 0.993559 0.500018 0.993559 0.500018 0.993559 0.500018 0.004071 0.996006 0.004071 </float_array>
+     <technique_common>
+      <accessor source="#ID11-array" count="24" stride="2">
+       <param name="S" type="float"/>
+       <param name="T" type="float"/>
+      </accessor>
+     </technique_common>
+    </source>
+    <source id="geometrySource12">
+     <float_array id="ID13-array" count="96">1 0 0 -1 1 0 0 -1 0.892736 0 0.45058 -1 0.772253 0.501702 0.38977 -1 0.888028 0.459789 0 -1 0.888028 0.459789 0 -1 0.593956 0 0.804498 -1 0.593956 0 0.804498 -1 0.892736 0 0.45058 -1 0.772254 0.5017 0.38977 -1 0.52745 0.459788 0.714417 -1 0.52745 0.459788 0.714417 -1 0.888029 -0.459788 0 -1 0.888029 -0.459788 0 -1 0.772254 -0.5017 0.38977 -1 0.892736 0 0.45058 -1 1 0 0 -1 1 0 0 -1 0.52745 -0.459788 0.714417 -1 0.527449 -0.459788 0.714418 -1 0.772254 -0.5017 0.38977 -1 0.892736 0 0.45058 -1 0.593956 0 0.804498 -1 0.593956 0 0.804498 -1 </float_array>
+     <technique_common>
+      <accessor source="#ID13-array" count="24" stride="4">
+       <param name="A" type="float"/>
+       <param name="B" type="float"/>
+       <param name="C" type="float"/>
+       <param name="D" type="float"/>
+      </accessor>
+     </technique_common>
+    </source>
+    <vertices id="grass_2_0-POSITION-vertices">
+     <input semantic="POSITION" source="#grass_2_0-POSITION"/>
+    </vertices>
+    <triangles count="8" material="geometryElement14">
+     <input semantic="VERTEX" offset="0" source="#grass_2_0-POSITION-vertices"/>
+     <input semantic="NORMAL" offset="0" source="#grass_2_0-Normal0"/>
+     <input semantic="TEXCOORD" offset="0" source="#grass_2_0-UV0" set="1"/>
+     <input semantic="TEXTANGENT" offset="0" source="#geometrySource12"/>
+     <p>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 </p>
+    </triangles>
+   </mesh>
+  </geometry>
+ </library_geometries>
+ <library_visual_scenes>
+  <visual_scene id="scene15">
+   <node id="grass_2_0" name="grass_2_0">
+    <matrix>2.276701 1e-06 3.083734 0 0 3.833117 -1e-06 0 -3.083734 0 2.276701 0 0 0 0 1 </matrix>
+    <instance_geometry url="#grass_2_0-lib">
+     <bind_material>
+      <technique_common>
+       <instance_material symbol="geometryElement14" target="#material">
+        <bind_vertex_input semantic="CHANNEL2" input_semantic="TEXCOORD" input_set="1"/>
+        <bind_vertex_input semantic="CHANNEL3" input_semantic="TEXCOORD" input_set="1"/>
+        <bind_vertex_input semantic="CHANNEL5" input_semantic="TEXCOORD" input_set="1"/>
+        <bind_vertex_input semantic="CHANNEL7" input_semantic="TEXCOORD" input_set="1"/>
+       </instance_material>
+      </technique_common>
+     </bind_material>
+    </instance_geometry>
+   </node>
+  </visual_scene>
+ </library_visual_scenes>
+ <scene>
+  <instance_visual_scene url="#scene15"/>
+ </scene>
+</COLLADA>

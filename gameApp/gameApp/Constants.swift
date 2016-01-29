@@ -17,5 +17,7 @@ struct Constants {
         static let updateAmmo = "elg-updateAmmo"
         static let updateReadyStatus = "elg-updateReadyStatus"
         static let updateHUD = "elg-updateHUD"
+        static let setHudDeadView = "elg-setHudDeadView"
+        static let sendPlayerDeadMessage = "elg-sendDeadMessage"
     }
 }

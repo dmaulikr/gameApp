@@ -18,17 +18,22 @@ class Player: SCNNode {
     
     var id: ID?
     var levelNode: SCNNode!
-    let width: CGFloat = 5
+    let width: CGFloat = 10
     let height: CGFloat = 12
     let length: CGFloat = 2
     let speed: CGFloat = 1.0
     let jumpHeight: CGFloat = 10
-    var health: CGFloat = 100
-    let damage: CGFloat = 5
+    let healthMax: Int = 100
+    let damage: Int = 5
+    var health: Int = 100
     var equippedWeapon: Weapon?
     var startedEnemyContact: Bool!
     
-    var gruntAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/male-grunt.wav")!
+    let gruntAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/male-grunt.wav")!
+    let slurpAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/slurp.mp3")!
+    let popCorkAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/pop_cork.mp3")!
+    let evilLaughAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/evilLaugh.mp3")!
+    let heartbeatAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/heartbeat.mp3")!
     
     var movementDirectionVector: SCNVector3?
     var shootingDirectionVector: SCNVector3?
@@ -62,7 +67,8 @@ class Player: SCNNode {
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
         self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
-        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy | ColliderType.Player
+        self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy | ColliderType.Player | ColliderType.WorldItem
+        self.physicsBody?.contactTestBitMask = ColliderType.InventoryItem
         self.physicsBody?.friction = 0.7
         self.physicsBody?.restitution = 0 // does not bounce during collisions
         
@@ -74,6 +80,8 @@ class Player: SCNNode {
         startedEnemyContact = false
         
         gruntAudioSource.load()
+        slurpAudioSource.load()
+        popCorkAudioSource.load()
     }
     
     required init?(coder: NSCoder) {
@@ -190,8 +198,8 @@ class Player: SCNNode {
     func playerNotMoving() {
         movementDirectionVector = SCNVector3Make(0, 0, 0)
     }
-
-    func subtractPlayerHealth(damage: CGFloat) {
+    
+    func subtractPlayerHealth(damage: Int) {
         self.health -= damage
         
         let gruntAction = SCNAction.playAudioSource(gruntAudioSource, waitForCompletion: false)
@@ -199,6 +207,22 @@ class Player: SCNNode {
         
         // Send notification to HUD to subtract health.
         NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "health": self.health])
+        
+        if self.health <= 0 {
+            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.setHudDeadView, object: self, userInfo: ["playerID": self.id!.hashValue])
+            
+            // Disable player controls: Send notification
+            for peerKey in ConnectedPeers.dict.allKeys {
+                if (ConnectedPeers.dict.objectForKey(peerKey) as! Peer).player?.id == self.id {
+                    NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.sendPlayerDeadMessage, object: self, userInfo: ["playerMCPeerID": peerKey])
+                }
+            }
+            let playerDeadLaugh = SCNAction.playAudioSource(evilLaughAudioSource, waitForCompletion: false)
+            self.runAction(playerDeadLaugh)
+        } else if self.health > 0 && self.health < 20 {
+            let heartbeatSound = SCNAction.playAudioSource(heartbeatAudioSource, waitForCompletion: false)
+            self.runAction(heartbeatSound)
+        }
     }
     
     func playerAttack() {
@@ -229,6 +253,45 @@ class Player: SCNNode {
     
     func reloadWeapon() {
         self.equippedWeapon?.reload()
+    }
+    
+    func equipBooster(inventoryItem: InventoryItem) {
+        if inventoryItem.boostType == InventoryItem.BoostType.Health {
+            if self.health == self.healthMax {
+                return
+            } else {
+                let popCorkSound = SCNAction.playAudioSource(popCorkAudioSource, waitForCompletion: true)
+                self.runAction(popCorkSound)
+                let slurpSound = SCNAction.playAudioSource(slurpAudioSource, waitForCompletion: true)
+                self.runAction(slurpSound)
+                if self.health + inventoryItem.boostAmount! <= self.healthMax
+                {
+                    self.health += inventoryItem.boostAmount!
+                } else {
+                    self.health = self.healthMax
+                }
+                NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "health": self.health])
+                inventoryItem.removeFromParentNode()
+            }
+        }
+        
+        if inventoryItem.boostType == InventoryItem.BoostType.Ammo {
+            if self.equippedWeapon?.ammoCarried == self.equippedWeapon?.ammoCarriedMax && self.equippedWeapon?.ammoLoaded == self.equippedWeapon?.ammoLoadedMax {
+                return
+            } else {
+                let popCorkSound = SCNAction.playAudioSource(popCorkAudioSource, waitForCompletion: true)
+                self.runAction(popCorkSound)
+                if self.equippedWeapon!.ammoCarried! + inventoryItem.boostAmount! <= self.equippedWeapon?.ammoCarriedMax!
+                {
+                    self.equippedWeapon!.ammoCarried! += inventoryItem.boostAmount!
+                } else {
+                    self.equippedWeapon!.ammoCarried! = self.equippedWeapon!.ammoCarriedMax!
+                }
+                NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "ammoLoaded": self.equippedWeapon!.ammoLoaded!, "ammoCarried":self.equippedWeapon!.ammoCarried!])
+                inventoryItem.removeFromParentNode()
+                
+            }
+        }
     }
     
     func ownCameraNode() -> Camera {

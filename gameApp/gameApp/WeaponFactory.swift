@@ -20,6 +20,7 @@ class WeaponFactory: NSObject {
         handgun.type = WeaponType.Handgun
         handgun.baseDamage = 15
         handgun.ammoCarried = 36
+        handgun.ammoCarriedMax = 36
         handgun.ammoLoaded = 8
         handgun.ammoLoadedMax = 8
         handgun.attackInterval = 0.2
@@ -28,6 +29,8 @@ class WeaponFactory: NSObject {
         handgun.bulletAudioSource?.load()
         handgun.outOfAmmoAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/outOfAmmo.wav")
         handgun.outOfAmmoAudioSource?.load()
+        handgun.reloadAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/reloadGun.mp3")
+        handgun.reloadAudioSource?.load()
         
         // Get model
         let weaponScene = SCNScene(named: "art.scnassets/Handgun/Handgun.dae")

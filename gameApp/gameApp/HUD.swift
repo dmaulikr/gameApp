@@ -15,10 +15,8 @@ class HUD: SKScene {
     var healthMeter: SKSpriteNode!
     var healthLabel: SKLabelNode!
     var ammoLabel: SKLabelNode!
-    var crosshairLeft: SKSpriteNode!
-    var crosshairRight: SKSpriteNode!
-    var crosshairTop: SKSpriteNode!
-    var crosshairBottom: SKSpriteNode!
+    var deadLabel: SKLabelNode!
+    var backgroundNode: SKSpriteNode!
     
     override init() {
         super.init()
@@ -34,31 +32,19 @@ class HUD: SKScene {
         self.crosshair.position = CGPointMake(self.frame.width*0.5, self.frame.height*0.5)
         //self.crosshair.zPosition = 1.0
         
-        self.healthLabel = SKLabelNode(fontNamed: "San Francisco")
+        self.healthLabel = SKLabelNode(fontNamed: "Avenir Next")
         self.healthLabel.name = "healthLabel"
         self.healthLabel.fontSize = 25
         self.healthLabel.fontColor = NSColor.whiteColor()
         self.healthLabel.text = "Health: 100"
         self.healthLabel.position = CGPointMake(self.frame.width*0.9, self.frame.height*0.9)
         
-        self.ammoLabel = SKLabelNode(fontNamed: "San Francisco")
+        self.ammoLabel = SKLabelNode(fontNamed: "Avenir Next")
         self.ammoLabel.name = "ammoLabel"
         self.ammoLabel.fontSize = 25
         self.ammoLabel.fontColor = NSColor.whiteColor()
         self.ammoLabel.text = "8 | 36"
         self.ammoLabel.position = CGPointMake(self.frame.width*0.9, self.frame.height*0.8)
-        
-        self.crosshairLeft = SKSpriteNode(color: NSColor.blackColor(), size: CGSizeMake(2, 4))
-        self.crosshairLeft.position = CGPointMake(self.frame.width*0.495, self.frame.height*0.5)
-        
-        self.crosshairRight = SKSpriteNode(color: NSColor.blackColor(), size: CGSizeMake(2, 4))
-        self.crosshairRight.position = CGPointMake(self.frame.width*0.505, self.frame.height*0.5)
-        
-        self.crosshairTop = SKSpriteNode(color: NSColor.blackColor(), size: CGSizeMake(2, 4))
-        self.crosshairTop.position = CGPointMake(self.frame.width*0.5, self.frame.height*0.505)
-
-        self.crosshairBottom = SKSpriteNode(color: NSColor.blackColor(), size: CGSizeMake(2, 4))
-        self.crosshairBottom.position = CGPointMake(self.frame.width*0.5, self.frame.height*0.495)
         
         self.addChild(crosshair)
         self.addChild(self.healthLabel)
@@ -67,6 +53,10 @@ class HUD: SKScene {
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    func updateSelf(infoDict: Dictionary<String, AnyObject>) {
+        
     }
     
     func updateHealthLabel(newLabel: String) {
@@ -79,5 +69,19 @@ class HUD: SKScene {
         dispatch_async(dispatch_get_main_queue(), {
             self.ammoLabel.text = newLabel
         })
+    }
+    
+    func setDeadView() {
+        self.backgroundNode = SKSpriteNode(color: NSColor.blackColor(), size: CGSize(width: self.frame.width*2, height: self.frame.height*2))
+        self.backgroundNode.position = CGPointMake(0, 0)
+        self.backgroundNode.alpha = 0.27
+        self.deadLabel = SKLabelNode(fontNamed: "Cracked")
+        self.deadLabel.name = "deadLabel"
+        self.deadLabel.fontSize = 100
+        self.deadLabel.fontColor = NSColor.redColor()
+        self.deadLabel.text = "You Are DEAD!"
+        self.deadLabel.position = CGPointMake(self.frame.width*0.5, self.frame.height*0.4)
+        self.addChild(backgroundNode)
+        backgroundNode.addChild(deadLabel)
     }
 }

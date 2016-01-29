@@ -22,8 +22,12 @@ class PairSingleDeviceViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //self.view.enterFullScreenMode(NSScreen.mainScreen()!, withOptions:nil)
-        //self.view.window?.hidesOnDeactivate = true
+        let presOptions: NSApplicationPresentationOptions = ([.FullScreen,.AutoHideMenuBar, .HideDock])
+        
+        let optionsDictionary = [NSFullScreenModeApplicationPresentationOptions :
+            NSNumber(unsignedLong: presOptions.rawValue)]
+        // enterFullScreenMode made everything blank
+        //self.view.enterFullScreenMode(NSScreen.mainScreen()!, withOptions:optionsDictionary)
         
         connectedPeersTableView.setDataSource(self)
         connectedPeersTableView.setDelegate(self)

@@ -651,10 +651,10 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="24" y="26" width="1250" height="700"/>
+            <rect key="contentRect" x="-70" y="-23" width="1350" height="800"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
             <view key="contentView" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" id="372">
-                <rect key="frame" x="0.0" y="0.0" width="1250" height="700"/>
+                <rect key="frame" x="0.0" y="0.0" width="1350" height="800"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
             <point key="canvasLocation" x="279" y="1392.5"/>
@@ -673,11 +673,11 @@
             </connections>
         </viewController>
         <customView horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" id="CP9-8V-Nh2">
-            <rect key="frame" x="0.0" y="0.0" width="1250" height="700"/>
+            <rect key="frame" x="0.0" y="0.0" width="1400" height="800"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Vwi-mJ-1os">
-                    <rect key="frame" x="474" y="434" width="303" height="58"/>
+                    <rect key="frame" x="474" y="534" width="303" height="58"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="299" id="Yw5-Ir-bjb"/>
                         <constraint firstAttribute="height" constant="58" id="ef2-Hm-AUt"/>
@@ -689,7 +689,7 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WCB-6E-06Z">
-                    <rect key="frame" x="429" y="390" width="393" height="22"/>
+                    <rect key="frame" x="429" y="490" width="393" height="22"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="389" id="WI0-qc-pTH"/>
                     </constraints>
@@ -699,15 +699,18 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <box verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="ZV6-3q-z0o">
-                    <rect key="frame" x="460" y="371" width="329" height="9"/>
+                <box verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="ZV6-3q-z0o">
+                    <rect key="frame" x="460" y="471" width="329" height="9"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="5" id="NQD-G8-b1i"/>
+                    </constraints>
                     <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                     <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <font key="titleFont" metaFont="system"/>
                 </box>
-                <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="67" horizontalPageScroll="10" verticalLineScroll="67" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W4d-VT-9eR">
-                    <rect key="frame" x="388" y="119" width="475" height="236"/>
-                    <clipView key="contentView" ambiguous="YES" id="CbK-fH-vTk">
+                <scrollView autohidesScrollers="YES" horizontalLineScroll="67" horizontalPageScroll="10" verticalLineScroll="67" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W4d-VT-9eR">
+                    <rect key="frame" x="388" y="219" width="475" height="236"/>
+                    <clipView key="contentView" id="CbK-fH-vTk">
                         <rect key="frame" x="1" y="1" width="473" height="234"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -735,8 +738,11 @@
                                                 <rect key="frame" x="2" y="25" width="538" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5hA-Lq-mNr">
+                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="5hA-Lq-mNr">
                                                         <rect key="frame" x="0.0" y="0.0" width="100" height="17"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="96" id="Q28-MC-ejk"/>
+                                                        </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="Kk3-g3-Gfa">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -744,6 +750,10 @@
                                                         </textFieldCell>
                                                     </textField>
                                                 </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="5hA-Lq-mNr" firstAttribute="centerY" secondItem="lqy-ug-3jp" secondAttribute="centerY" id="62T-yM-T3d"/>
+                                                    <constraint firstItem="5hA-Lq-mNr" firstAttribute="leading" secondItem="lqy-ug-3jp" secondAttribute="leading" constant="2" id="ZcC-3a-zRp"/>
+                                                </constraints>
                                             </tableCellView>
                                         </prototypeCellViews>
                                     </tableColumn>
@@ -765,7 +775,14 @@
             <constraints>
                 <constraint firstItem="Vwi-mJ-1os" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="476" id="4y1-bf-w9P"/>
                 <constraint firstItem="WCB-6E-06Z" firstAttribute="top" secondItem="Vwi-mJ-1os" secondAttribute="bottom" constant="22" id="719-FV-axd"/>
+                <constraint firstItem="W4d-VT-9eR" firstAttribute="centerX" secondItem="WCB-6E-06Z" secondAttribute="centerX" id="Iv2-oy-gOr"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="centerX" secondItem="CP9-8V-Nh2" secondAttribute="centerX" constant="-75.5" id="aUA-wA-c4p"/>
+                <constraint firstAttribute="bottom" secondItem="W4d-VT-9eR" secondAttribute="bottom" constant="219" id="eIR-wY-W1n"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="top" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="12" id="f5q-jG-hGu"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="460" id="ga3-Yl-48B"/>
                 <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="Vwi-mJ-1os" secondAttribute="centerX" id="n2U-Z6-vym"/>
+                <constraint firstItem="W4d-VT-9eR" firstAttribute="top" secondItem="ZV6-3q-z0o" secondAttribute="bottom" constant="18" id="tJt-Y4-qaG"/>
+                <constraint firstItem="W4d-VT-9eR" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="388" id="ueh-mH-N9n"/>
                 <constraint firstItem="Vwi-mJ-1os" firstAttribute="top" secondItem="CP9-8V-Nh2" secondAttribute="top" constant="208" id="x8W-uA-1is"/>
             </constraints>
             <point key="canvasLocation" x="279" y="542"/>

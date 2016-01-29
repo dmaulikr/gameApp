@@ -11,16 +11,18 @@ import SceneKit
 
 class Weapon: SCNNode {
     
-    var baseDamage: CGFloat?
-    var ammoLoadedMax: CGFloat?
-    var ammoLoaded: CGFloat?
-    var ammoCarried: CGFloat?
+    var baseDamage: Int?
+    var ammoLoadedMax: Int?
+    var ammoCarriedMax: Int?
+    var ammoLoaded: Int?
+    var ammoCarried: Int?
     var attackInterval: NSTimeInterval?
     var reloadTime: NSTimeInterval?
     var type: WeaponType?
     var startedEnemyContact: Bool!
     var bulletAudioSource: SCNAudioSource?
     var outOfAmmoAudioSource: SCNAudioSource?
+    var reloadAudioSource: SCNAudioSource?
     var bullet: SCNNode?
     var owner: Player?
     
@@ -67,6 +69,7 @@ class Weapon: SCNNode {
     }
     
     func reload() {
+        if !(self.ammoCarried == self.ammoCarriedMax && self.ammoLoaded == self.ammoLoadedMax) {
         if self.ammoCarried >= self.ammoLoadedMax {
             self.ammoLoaded = self.ammoLoadedMax
             self.ammoCarried = self.ammoCarried! - self.ammoLoaded!
@@ -75,6 +78,9 @@ class Weapon: SCNNode {
             self.ammoCarried = self.ammoCarried! - self.ammoLoaded!
         }
         NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.owner!.id!.hashValue, "ammoCarried": self.ammoCarried!, "ammoLoaded" : self.ammoLoaded!])
+            let reloadSoundAction = SCNAction.playAudioSource(reloadAudioSource!, waitForCompletion: false)
+            self.runAction(reloadSoundAction)
+        }
     }
     
 }

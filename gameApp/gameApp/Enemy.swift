@@ -17,8 +17,8 @@ struct State {
 
 class Enemy: SCNNode {
     
-    var health: CGFloat!
-    var damage: CGFloat!
+    var health: Int!
+    var damage: Int!
     var speed: CGFloat!
     var panicDistance: CGFloat!
     var viewDistance: CGFloat!
@@ -33,6 +33,10 @@ class Enemy: SCNNode {
     var wanderTimer: NSTimer!
     var currentMovementDirection: SCNVector3!
     var state: String!
+    
+    var playerDetectedAudioSource: SCNAudioSource?
+    var attackedAudioSource: SCNAudioSource?
+    var dyingAudioSource: SCNAudioSource?
     
     override init() {
         super.init()
@@ -116,12 +120,18 @@ class Enemy: SCNNode {
             let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: currTarget.presentationNode.position)
             let distance = VectorMath.getVectorMagnitude(toTarget)
             
+//            switch(distance) {
+//            case 0..<self.panicDistance:
+//                self.state = State.flee
+//            case self.panicDistance..<self.viewDistance+1:
+//                self.state = State.arrive
+//            default:
+//                self.state = State.wander
+            
             switch(distance) {
-            case 0..<self.panicDistance:
-                self.state = State.flee
-            case self.panicDistance..<self.viewDistance+1:
+                case 0..<self.viewDistance+1:
                 self.state = State.arrive
-            default:
+                default:
                 self.state = State.wander
             }
         } else {
@@ -187,6 +197,19 @@ class Enemy: SCNNode {
            // }
         } else {
             self.physicsBody?.clearAllForces()
+        }
+    }
+    
+    func applyDamage(damage: Int) {
+        if self.dead == false {
+            self.health = self.health - damage
+            let attackedSoundAction = SCNAction.playAudioSource(attackedAudioSource!, waitForCompletion: false)
+            self.runAction(attackedSoundAction)
+            if health <= 0 {
+                let dyingSoundAction = SCNAction.playAudioSource(dyingAudioSource!, waitForCompletion: false)
+                self.runAction(dyingSoundAction)
+                dead = true
+            }
         }
     }
 }
