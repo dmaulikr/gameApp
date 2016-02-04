@@ -15,27 +15,31 @@ class GameViewController: NSViewController {
     
     @IBOutlet var sceneView1: SCNView!
     @IBOutlet var sceneView2: SCNView!
+    var level: String?
     
     var gameSim: GameSimulation!
     var hud: HUD!
     var hud2: HUD!
     
     override func awakeFromNib(){
-        gameSim = GameSimulation()
+        let viewLayer = CALayer()
+        viewLayer.backgroundColor = CGColorCreateGenericRGB(0.0, 0, 0, 1)
+        self.view.wantsLayer = true
+        self.view.layer = viewLayer
+        gameSim = GameSimulation(level: level!)
         
         // Set up player 1 scene
         sceneView1.scene = gameSim
-        sceneView1.playing = true
         sceneView1.delegate = gameSim
+        sceneView1.playing = true
         //sceneView1.showsStatistics = true
-        sceneView1.pointOfView = (gameSim.gameLevel.playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).ownCameraNode()
+        sceneView1.pointOfView = (gameSim.gameLevel.currentLevel.playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).ownCameraNode()
         
         // Set up player 2 scene
         sceneView2.scene = gameSim
         sceneView2.playing = true
-        sceneView2.delegate = gameSim
         //sceneView2.showsStatistics = true
-        sceneView2.pointOfView = (gameSim.gameLevel.playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).ownCameraNode()
+        sceneView2.pointOfView = (gameSim.gameLevel.currentLevel.playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).ownCameraNode()
         
         // Needs to be initialized in main queue
         
@@ -50,7 +54,8 @@ class GameViewController: NSViewController {
         self.sceneView2.prepareObject(self.sceneView2.scene!, shouldAbortBlock:nil) // caches
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateHUD:", name: Constants.Notifications.updateHUD, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "hudSetDeadView:", name: Constants.Notifications.setHudDeadView, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "hudSetDeadView:", name: Constants.Notifications.playerDeadHudUpdate, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "setLevel", name: Constants.Notifications.switchToGameView, object: nil)
         
     }
     

@@ -647,7 +647,7 @@
                 </menuItem>
             </items>
         </menu>
-        <window title="Island Escape" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="371">
+        <window title="Zombie Dash" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="371">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
@@ -668,39 +668,41 @@
         <viewController id="sDN-qG-bvi" customClass="PairSingleDeviceViewController" customModule="gameApp" customModuleProvider="target">
             <connections>
                 <outlet property="connectedPeersTableView" destination="Cir-AO-fWv" id="k3h-2u-3l5"/>
+                <outlet property="extremeHorrorLevelButton" destination="txh-ix-cR1" id="YGn-7U-y06"/>
+                <outlet property="horrorLevelButton" destination="Kvr-RJ-rEG" id="otJ-MV-ICR"/>
                 <outlet property="pairDeviceView" destination="CP9-8V-Nh2" id="Di1-Iy-Czq"/>
                 <outlet property="view" destination="372" id="umC-d6-V2v"/>
             </connections>
         </viewController>
         <customView horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" id="CP9-8V-Nh2">
-            <rect key="frame" x="0.0" y="0.0" width="1400" height="800"/>
+            <rect key="frame" x="0.0" y="0.0" width="1350" height="800"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Vwi-mJ-1os">
-                    <rect key="frame" x="474" y="534" width="303" height="58"/>
+                    <rect key="frame" x="524" y="678" width="303" height="58"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="299" id="Yw5-Ir-bjb"/>
                         <constraint firstAttribute="height" constant="58" id="ef2-Hm-AUt"/>
                     </constraints>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Pair iOS Controller" id="sfb-Hd-s8K">
-                        <font key="font" size="30" name=".HelveticaNeueDeskInterface-Regular"/>
+                        <font key="font" size="30" name="AvenirNext-Regular"/>
                         <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WCB-6E-06Z">
-                    <rect key="frame" x="429" y="490" width="393" height="22"/>
+                    <rect key="frame" x="479" y="634" width="393" height="31"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="389" id="WI0-qc-pTH"/>
+                        <constraint firstAttribute="width" constant="389" id="tT0-ee-elh"/>
                     </constraints>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Waiting for players..." id="pnv-5I-xRl">
-                        <font key="font" size="18" name=".HelveticaNeueDeskInterface-Regular"/>
+                        <font key="font" size="18" name="AvenirNext-Regular"/>
                         <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <box verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="ZV6-3q-z0o">
-                    <rect key="frame" x="460" y="471" width="329" height="9"/>
+                    <rect key="frame" x="510" y="615" width="329" height="9"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="5" id="NQD-G8-b1i"/>
                     </constraints>
@@ -709,13 +711,13 @@
                     <font key="titleFont" metaFont="system"/>
                 </box>
                 <scrollView autohidesScrollers="YES" horizontalLineScroll="67" horizontalPageScroll="10" verticalLineScroll="67" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W4d-VT-9eR">
-                    <rect key="frame" x="388" y="219" width="475" height="236"/>
+                    <rect key="frame" x="438" y="363" width="474" height="236"/>
                     <clipView key="contentView" id="CbK-fH-vTk">
-                        <rect key="frame" x="1" y="1" width="473" height="234"/>
+                        <rect key="frame" x="1" y="1" width="472" height="234"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" rowSizeStyle="automatic" viewBased="YES" id="Cir-AO-fWv">
-                                <rect key="frame" x="0.0" y="0.0" width="543" height="234"/>
+                                <rect key="frame" x="0.0" y="0.0" width="543" height="0.0"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="5" height="50"/>
                                 <color key="backgroundColor" red="0.039215686270000001" green="0.070588235289999995" blue="0.1529411765" alpha="1" colorSpace="calibratedRGB"/>
@@ -763,7 +765,7 @@
                         <color key="backgroundColor" red="0.12653740569999999" green="0.1268457938" blue="0.19875163260000001" alpha="1" colorSpace="calibratedRGB"/>
                     </clipView>
                     <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="enl-m9-9E4">
-                        <rect key="frame" x="1" y="219" width="473" height="16"/>
+                        <rect key="frame" x="1" y="219" width="472" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="SBS-Rx-YjT">
@@ -771,21 +773,72 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="Kvr-RJ-rEG">
+                    <rect key="frame" x="438" y="124" width="222" height="132"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="132" id="UnV-fV-EUL"/>
+                    </constraints>
+                    <buttonCell key="cell" type="square" title="Horror: Zombies" bezelStyle="shadowlessSquare" image="level_Zombies" imagePosition="overlaps" alignment="center" alternateImage="level_Zombies" enabled="NO" imageScaling="proportionallyUpOrDown" inset="2" id="HuN-Ye-EOQ">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" size="25" name="Cracked"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="horrorLevel:" target="sDN-qG-bvi" id="2YQ-pf-FMo"/>
+                    </connections>
+                </button>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="txh-ix-cR1">
+                    <rect key="frame" x="694" y="127" width="218" height="129"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="218" id="C0Z-QI-ARt"/>
+                    </constraints>
+                    <buttonCell key="cell" type="square" title="Extreme Horror: Asylum" bezelStyle="shadowlessSquare" image="level_Asylum" imagePosition="overlaps" alignment="center" alternateImage="level_Asylum." enabled="NO" imageScaling="proportionallyUpOrDown" inset="2" id="qd8-BA-2SB">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" size="25" name="Cracked"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="extremehorrorLevel:" target="sDN-qG-bvi" id="uwf-6G-xuf"/>
+                    </connections>
+                </button>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="muA-Bq-NwL">
+                    <rect key="frame" x="579" y="264" width="192" height="50"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="188" id="sHk-pa-cdM"/>
+                    </constraints>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Select Map:" id="ei6-vx-AJs">
+                        <font key="font" size="25" name="AvenirNext-Regular"/>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <constraints>
-                <constraint firstItem="Vwi-mJ-1os" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="476" id="4y1-bf-w9P"/>
-                <constraint firstItem="WCB-6E-06Z" firstAttribute="top" secondItem="Vwi-mJ-1os" secondAttribute="bottom" constant="22" id="719-FV-axd"/>
-                <constraint firstItem="W4d-VT-9eR" firstAttribute="centerX" secondItem="WCB-6E-06Z" secondAttribute="centerX" id="Iv2-oy-gOr"/>
-                <constraint firstItem="ZV6-3q-z0o" firstAttribute="centerX" secondItem="CP9-8V-Nh2" secondAttribute="centerX" constant="-75.5" id="aUA-wA-c4p"/>
-                <constraint firstAttribute="bottom" secondItem="W4d-VT-9eR" secondAttribute="bottom" constant="219" id="eIR-wY-W1n"/>
-                <constraint firstItem="ZV6-3q-z0o" firstAttribute="top" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="12" id="f5q-jG-hGu"/>
-                <constraint firstItem="ZV6-3q-z0o" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="460" id="ga3-Yl-48B"/>
-                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="Vwi-mJ-1os" secondAttribute="centerX" id="n2U-Z6-vym"/>
+                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="W4d-VT-9eR" secondAttribute="centerX" id="42E-Br-aXK"/>
+                <constraint firstItem="Vwi-mJ-1os" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="526" id="4y1-bf-w9P"/>
+                <constraint firstItem="muA-Bq-NwL" firstAttribute="top" secondItem="W4d-VT-9eR" secondAttribute="bottom" constant="49" id="5DK-Gp-Apl"/>
+                <constraint firstItem="txh-ix-cR1" firstAttribute="trailing" secondItem="W4d-VT-9eR" secondAttribute="trailing" id="6fe-Cz-a0d"/>
+                <constraint firstAttribute="bottom" secondItem="Kvr-RJ-rEG" secondAttribute="bottom" constant="124" id="IWH-3q-bYc"/>
+                <constraint firstItem="txh-ix-cR1" firstAttribute="leading" secondItem="Kvr-RJ-rEG" secondAttribute="trailing" constant="34" id="T53-lI-AX2"/>
+                <constraint firstItem="Kvr-RJ-rEG" firstAttribute="centerY" secondItem="txh-ix-cR1" secondAttribute="centerY" constant="1.5" id="VHH-6o-QKM"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="centerX" secondItem="CP9-8V-Nh2" secondAttribute="centerX" constant="-0.5" id="aUA-wA-c4p"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="top" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="12" id="gFx-Nc-oN7"/>
+                <constraint firstItem="ZV6-3q-z0o" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="510" id="ga3-Yl-48B"/>
+                <constraint firstItem="Kvr-RJ-rEG" firstAttribute="top" secondItem="muA-Bq-NwL" secondAttribute="bottom" constant="8" id="gjh-JJ-Mrj"/>
+                <constraint firstItem="txh-ix-cR1" firstAttribute="top" secondItem="W4d-VT-9eR" secondAttribute="bottom" constant="107" id="j7b-Nn-gwo"/>
+                <constraint firstAttribute="bottom" secondItem="txh-ix-cR1" secondAttribute="bottom" constant="127" id="jOK-ov-7bL"/>
+                <constraint firstAttribute="bottom" secondItem="WCB-6E-06Z" secondAttribute="bottom" constant="634" id="jlJ-3I-sqd"/>
+                <constraint firstItem="Kvr-RJ-rEG" firstAttribute="leading" secondItem="W4d-VT-9eR" secondAttribute="leading" id="lh9-yr-PUy"/>
                 <constraint firstItem="W4d-VT-9eR" firstAttribute="top" secondItem="ZV6-3q-z0o" secondAttribute="bottom" constant="18" id="tJt-Y4-qaG"/>
-                <constraint firstItem="W4d-VT-9eR" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="388" id="ueh-mH-N9n"/>
-                <constraint firstItem="Vwi-mJ-1os" firstAttribute="top" secondItem="CP9-8V-Nh2" secondAttribute="top" constant="208" id="x8W-uA-1is"/>
+                <constraint firstItem="W4d-VT-9eR" firstAttribute="leading" secondItem="CP9-8V-Nh2" secondAttribute="leading" constant="438" id="ueh-mH-N9n"/>
+                <constraint firstItem="WCB-6E-06Z" firstAttribute="centerX" secondItem="Vwi-mJ-1os" secondAttribute="centerX" id="wMD-5H-r0d"/>
+                <constraint firstItem="Vwi-mJ-1os" firstAttribute="top" secondItem="CP9-8V-Nh2" secondAttribute="top" constant="64" id="x8W-uA-1is"/>
+                <constraint firstItem="muA-Bq-NwL" firstAttribute="centerX" secondItem="W4d-VT-9eR" secondAttribute="centerX" id="zat-0z-BOz"/>
             </constraints>
             <point key="canvasLocation" x="279" y="542"/>
         </customView>
     </objects>
+    <resources>
+        <image name="level_Asylum" width="479" height="285"/>
+        <image name="level_Asylum." width="128" height="128"/>
+        <image name="level_Zombies" width="480" height="284"/>
+    </resources>
 </document>

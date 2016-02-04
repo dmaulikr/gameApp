@@ -13,6 +13,8 @@ class PairSingleDeviceViewController: NSViewController {
     
     @IBOutlet var pairDeviceView: NSView!
     @IBOutlet var connectedPeersTableView: NSTableView!
+    @IBOutlet var horrorLevelButton: NSButton!
+    @IBOutlet var extremeHorrorLevelButton: NSButton!
     
     var serviceManager: ServiceManager?
     var gameViewController: GameViewController = GameViewController()
@@ -22,13 +24,6 @@ class PairSingleDeviceViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let presOptions: NSApplicationPresentationOptions = ([.FullScreen,.AutoHideMenuBar, .HideDock])
-        
-        let optionsDictionary = [NSFullScreenModeApplicationPresentationOptions :
-            NSNumber(unsignedLong: presOptions.rawValue)]
-        // enterFullScreenMode made everything blank
-        //self.view.enterFullScreenMode(NSScreen.mainScreen()!, withOptions:optionsDictionary)
-        
         connectedPeersTableView.setDataSource(self)
         connectedPeersTableView.setDelegate(self)
         connectedPeersTableView.registerNib(tableCellViewNib, forIdentifier: "TableCellView")
@@ -42,7 +37,7 @@ class PairSingleDeviceViewController: NSViewController {
         // Do view setup here.
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "addPeerInvite:", name: Constants.Notifications.addPeerInvite, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateReadyStatus:", name: Constants.Notifications.updateReadyStatus, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "switchToGameView", name: Constants.Notifications.switchToGameView, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "enableLevelSelect", name: Constants.Notifications.switchToGameView, object: nil)
         serviceManager = ServiceManager()
     }
     
@@ -79,11 +74,27 @@ class PairSingleDeviceViewController: NSViewController {
         return count
     }
     
+    func enableLevelSelect() {
+        horrorLevelButton.enabled = true
+        extremeHorrorLevelButton.enabled = true
+    }
+    
     func switchToGameView() {
         dispatch_async(dispatch_get_main_queue(), {
             self.view.replaceSubview(self.pairDeviceView, with: self.gameViewController.view)
         })
     }
+    
+    @IBAction func horrorLevel(sender: NSButton) {
+        self.gameViewController.level = "horror"
+        switchToGameView()
+    }
+    
+    @IBAction func extremehorrorLevel(sender: NSButton) {
+        self.gameViewController.level = "extremeHorror"
+        switchToGameView()
+    }
+    
 }
 
 extension PairSingleDeviceViewController : NSTableViewDataSource, NSTableViewDelegate
@@ -106,7 +117,7 @@ extension PairSingleDeviceViewController : NSTableViewDataSource, NSTableViewDel
         view.readyTF.stringValue = tuple.status
         
         if self.readyCount() == 2 {
-            self.switchToGameView()
+            self.enableLevelSelect()
         }
         
         return view

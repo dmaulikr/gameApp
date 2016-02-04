@@ -12,9 +12,13 @@
 		6E49B9F81C51714C00D36BF1 /* InventoryItemFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E49B9F71C51714C00D36BF1 /* InventoryItemFactory.swift */; };
 		6E49B9FA1C517CC700D36BF1 /* WorldItemFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E49B9F91C517CC700D36BF1 /* WorldItemFactory.swift */; };
 		6E62A2301C1D88A20089E9CC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E62A22F1C1D88A20089E9CC /* Constants.swift */; };
+		6E67932B1C631FBB00201CF8 /* level1.scn in Resources */ = {isa = PBXBuildFile; fileRef = 6E67932A1C631FBB00201CF8 /* level1.scn */; };
+		6E736C7E1C6307BF002934C4 /* LevelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E736C7D1C6307BF002934C4 /* LevelFactory.swift */; };
+		6E736C801C63080B002934C4 /* Level.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E736C7F1C63080B002934C4 /* Level.swift */; };
 		6EA02A281C4C35DA00D9EAC7 /* TableCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6EA02A271C4C35DA00D9EAC7 /* TableCellView.xib */; };
 		6EA02A2A1C4C36FB00D9EAC7 /* TableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */; };
-		6EC9D22F1C57C646006124AB /* Level1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC9D22E1C57C646006124AB /* Level1.swift */; };
+		6EC964441C63A94F00370A01 /* level_Asylum.png in Resources */ = {isa = PBXBuildFile; fileRef = 6EC964431C63A94F00370A01 /* level_Asylum.png */; };
+		6EC964461C63A96500370A01 /* level_Zombies.png in Resources */ = {isa = PBXBuildFile; fileRef = 6EC964451C63A96500370A01 /* level_Zombies.png */; };
 		6EE633F21C513A290083FBA7 /* level2.scn in Resources */ = {isa = PBXBuildFile; fileRef = 6EE633F11C513A290083FBA7 /* level2.scn */; };
 		9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2059FE1BCAF6A200A66DC2 /* Player.swift */; };
 		9E205A011BCAFA1000A66DC2 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205A001BCAFA1000A66DC2 /* Camera.swift */; };
@@ -31,8 +35,6 @@
 		9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */; };
 		9E8B38201BE7F3DB002DA997 /* SteeringBehaviors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B381F1BE7F3DB002DA997 /* SteeringBehaviors.swift */; };
 		9EAFA0DE1BE84A4D00B77A13 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAFA0DD1BE84A4D00B77A13 /* VectorMath.swift */; };
-		9EB040021BE149C9009F244E /* AIStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB040011BE149C9009F244E /* AIStateMachine.swift */; };
-		9EB040041BE149DD009F244E /* AIState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB040031BE149DD009F244E /* AIState.swift */; };
 		9EB3C60B1BE1C3C700C17A80 /* GameSimulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3C60A1BE1C3C700C17A80 /* GameSimulation.swift */; };
 		9EB3C60D1BE1C40500C17A80 /* GameLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3C60C1BE1C40500C17A80 /* GameLevel.swift */; };
 		9EB5ACDA1BD69F3700332B59 /* Weapon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5ACD91BD69F3700332B59 /* Weapon.swift */; };
@@ -64,9 +66,13 @@
 		6E49B9F71C51714C00D36BF1 /* InventoryItemFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InventoryItemFactory.swift; sourceTree = "<group>"; };
 		6E49B9F91C517CC700D36BF1 /* WorldItemFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorldItemFactory.swift; sourceTree = "<group>"; };
 		6E62A22F1C1D88A20089E9CC /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		6E67932A1C631FBB00201CF8 /* level1.scn */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; name = level1.scn; path = art.scnassets/Levels/level1.scn; sourceTree = "<group>"; };
+		6E736C7D1C6307BF002934C4 /* LevelFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelFactory.swift; sourceTree = "<group>"; };
+		6E736C7F1C63080B002934C4 /* Level.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Level.swift; sourceTree = "<group>"; };
 		6EA02A271C4C35DA00D9EAC7 /* TableCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TableCellView.xib; sourceTree = "<group>"; };
 		6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableCellView.swift; sourceTree = "<group>"; };
-		6EC9D22E1C57C646006124AB /* Level1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Level1.swift; sourceTree = "<group>"; };
+		6EC964431C63A94F00370A01 /* level_Asylum.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = level_Asylum.png; path = ../level_Asylum.png; sourceTree = "<group>"; };
+		6EC964451C63A96500370A01 /* level_Zombies.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = level_Zombies.png; sourceTree = "<group>"; };
 		6EE633F11C513A290083FBA7 /* level2.scn */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; name = level2.scn; path = art.scnassets/Levels/level2.scn; sourceTree = "<group>"; };
 		9E2059FE1BCAF6A200A66DC2 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		9E205A001BCAFA1000A66DC2 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
@@ -89,8 +95,6 @@
 		9E3F3FD41BB3965F00AA5D0A /* GameViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GameViewController.xib; sourceTree = "<group>"; };
 		9E8B381F1BE7F3DB002DA997 /* SteeringBehaviors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SteeringBehaviors.swift; sourceTree = "<group>"; };
 		9EAFA0DD1BE84A4D00B77A13 /* VectorMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
-		9EB040011BE149C9009F244E /* AIStateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AIStateMachine.swift; sourceTree = "<group>"; };
-		9EB040031BE149DD009F244E /* AIState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AIState.swift; sourceTree = "<group>"; };
 		9EB3C60A1BE1C3C700C17A80 /* GameSimulation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameSimulation.swift; sourceTree = "<group>"; };
 		9EB3C60C1BE1C40500C17A80 /* GameLevel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameLevel.swift; sourceTree = "<group>"; };
 		9EB5ACD91BD69F3700332B59 /* Weapon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weapon.swift; sourceTree = "<group>"; };
@@ -147,22 +151,22 @@
 		9E230F0C1BB07F100046CC4E /* gameApp */ = {
 			isa = PBXGroup;
 			children = (
+				6EC964431C63A94F00370A01 /* level_Asylum.png */,
+				6EC964451C63A96500370A01 /* level_Zombies.png */,
 				9E230F0D1BB07F100046CC4E /* AppDelegate.swift */,
 				6E62A22F1C1D88A20089E9CC /* Constants.swift */,
-				9EB040011BE149C9009F244E /* AIStateMachine.swift */,
-				9EB040031BE149DD009F244E /* AIState.swift */,
 				9E8B381F1BE7F3DB002DA997 /* SteeringBehaviors.swift */,
 				9E230F3C1BB07F500046CC4E /* ServiceManager.swift */,
 				9E3F3FCA1BB3899600AA5D0A /* PairSingleDeviceViewController.swift */,
+				9E205A021BCB73A100A66DC2 /* HUD.swift */,
 				9E3F3FD31BB3965F00AA5D0A /* GameViewController.swift */,
 				9EB3C60A1BE1C3C700C17A80 /* GameSimulation.swift */,
-				6EC9D22E1C57C646006124AB /* Level1.swift */,
 				9EB3C60C1BE1C40500C17A80 /* GameLevel.swift */,
-				9E205A021BCB73A100A66DC2 /* HUD.swift */,
+				6E736C7D1C6307BF002934C4 /* LevelFactory.swift */,
+				6E736C7F1C63080B002934C4 /* Level.swift */,
 				9E205A001BCAFA1000A66DC2 /* Camera.swift */,
 				9E2059FE1BCAF6A200A66DC2 /* Player.swift */,
 				6E15DCD41C433BC80082BD3C /* Peer.swift */,
-				6EE633F11C513A290083FBA7 /* level2.scn */,
 				9EB5ACDB1BD6BAC100332B59 /* WeaponFactory.swift */,
 				9EB5ACD91BD69F3700332B59 /* Weapon.swift */,
 				9EB5ACDD1BD6BE2400332B59 /* EnemyFactory.swift */,
@@ -172,6 +176,8 @@
 				6E49B9F91C517CC700D36BF1 /* WorldItemFactory.swift */,
 				9EAFA0DD1BE84A4D00B77A13 /* VectorMath.swift */,
 				6EA02A291C4C36FB00D9EAC7 /* TableCellView.swift */,
+				6E67932A1C631FBB00201CF8 /* level1.scn */,
+				6EE633F11C513A290083FBA7 /* level2.scn */,
 				9E230F131BB07F100046CC4E /* art.scnassets */,
 				9E230F151BB07F100046CC4E /* Assets.xcassets */,
 				9E230F171BB07F100046CC4E /* MainMenu.xib */,
@@ -309,10 +315,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E67932B1C631FBB00201CF8 /* level1.scn in Resources */,
 				6EE633F21C513A290083FBA7 /* level2.scn in Resources */,
 				6EA02A281C4C35DA00D9EAC7 /* TableCellView.xib in Resources */,
 				9E3F3FD61BB3965F00AA5D0A /* GameViewController.xib in Resources */,
 				9E230F161BB07F100046CC4E /* Assets.xcassets in Resources */,
+				6EC964461C63A96500370A01 /* level_Zombies.png in Resources */,
+				6EC964441C63A94F00370A01 /* level_Asylum.png in Resources */,
 				9E230F141BB07F100046CC4E /* art.scnassets in Resources */,
 				9E230F191BB07F100046CC4E /* MainMenu.xib in Resources */,
 			);
@@ -339,18 +348,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6EC9D22F1C57C646006124AB /* Level1.swift in Sources */,
+				6E736C801C63080B002934C4 /* Level.swift in Sources */,
 				9E8B38201BE7F3DB002DA997 /* SteeringBehaviors.swift in Sources */,
 				6E62A2301C1D88A20089E9CC /* Constants.swift in Sources */,
 				9EB5ACDC1BD6BAC100332B59 /* WeaponFactory.swift in Sources */,
 				9E3F3FD51BB3965F00AA5D0A /* GameViewController.swift in Sources */,
-				9EB040021BE149C9009F244E /* AIStateMachine.swift in Sources */,
 				9EB5ACDE1BD6BE2400332B59 /* EnemyFactory.swift in Sources */,
 				6E49B9FA1C517CC700D36BF1 /* WorldItemFactory.swift in Sources */,
 				9E3F3FCC1BB3899600AA5D0A /* PairSingleDeviceViewController.swift in Sources */,
 				6E49B9F61C516F8B00D36BF1 /* InventoryItem.swift in Sources */,
 				9E230F0E1BB07F100046CC4E /* AppDelegate.swift in Sources */,
 				6E15DCD51C433BC80082BD3C /* Peer.swift in Sources */,
+				6E736C7E1C6307BF002934C4 /* LevelFactory.swift in Sources */,
 				9E2059FF1BCAF6A300A66DC2 /* Player.swift in Sources */,
 				9E205A031BCB73A100A66DC2 /* HUD.swift in Sources */,
 				6EA02A2A1C4C36FB00D9EAC7 /* TableCellView.swift in Sources */,
@@ -362,7 +371,6 @@
 				9EB3C60B1BE1C3C700C17A80 /* GameSimulation.swift in Sources */,
 				9EB5ACDA1BD69F3700332B59 /* Weapon.swift in Sources */,
 				6E49B9F81C51714C00D36BF1 /* InventoryItemFactory.swift in Sources */,
-				9EB040041BE149DD009F244E /* AIState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

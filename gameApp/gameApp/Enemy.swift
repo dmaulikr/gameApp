@@ -13,6 +13,7 @@ struct State {
     static let arrive = "arrive"
     static let flee = "flee"
     static let wander = "wander"
+    static let attack = "attack"
 }
 
 class Enemy: SCNNode {
@@ -22,8 +23,11 @@ class Enemy: SCNNode {
     var speed: CGFloat!
     var panicDistance: CGFloat!
     var viewDistance: CGFloat!
+    var attackDistance: CGFloat!
+    var attackForce: CGFloat!
+    var attackBreak: Double!
+    var latestAttack: NSTimeInterval!
     var fieldOfView: Double!
-    var stateMachine: AIStateMachine<Enemy>?
     var steer: SteeringBehaviors!
     var targets = [Player]()
     var currentTarget: Player?
@@ -37,38 +41,34 @@ class Enemy: SCNNode {
     var playerDetectedAudioSource: SCNAudioSource?
     var attackedAudioSource: SCNAudioSource?
     var dyingAudioSource: SCNAudioSource?
+    var spawnAudioSource: SCNAudioSource?
     
     override init() {
         super.init()
         
-        stateMachine = AIStateMachine(owner: self)
         steer = SteeringBehaviors(owner: self)
         oldRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         dead = false
         currentMovementDirection = SCNVector3Make(0, 0, 0)
         state = State.wander
         fieldOfView = M_PI
-        viewDistance = 200
+        viewDistance = 1000
+        attackDistance = 20
+        attackForce = 2.5
+        attackBreak = 2.5
+        latestAttack = 0.0
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     
-    func update() {
-        
-        if dead == false {
+    func update(time: NSTimeInterval) {
+        if self.dead == false {
             self.updateCurrentTarget()
             self.updateState()
-            self.performRotation()
-            self.performMovement()
-        } else {
-            self.physicsBody?.angularVelocityFactor = SCNVector3Make(1.0, 1.0, 0.0)
-            self.physicsBody?.applyTorque(SCNVector4Make(-1,0,0, CGFloat(M_PI_2)), impulse: true)
-            let fadeOut = SCNAction.fadeOutWithDuration(1.0)
-            let removeFromParent = SCNAction.removeFromParentNode()
-            let sequence = SCNAction.sequence([fadeOut, removeFromParent])
-            self.runAction(sequence)
+                self.performRotation()
+                self.executeState(time)
         }
     }
     
@@ -85,16 +85,26 @@ class Enemy: SCNNode {
         let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: node.presentationNode.position)
         let distance = VectorMath.getVectorMagnitude(toTarget)
         
-        if VectorMath.dotProduct(facingDirection, right: toTarget) >= 0
-        {
+       // if VectorMath.dotProduct(facingDirection, right: toTarget) >= 0
+        //{
             if distance < self.viewDistance {
+                // Then check if there is anything else between enemy and player
+                let collisionObjs = self.levelNode.hitTestWithSegmentFromPoint(self.presentationNode.position, toPoint: node.presentationNode.position, options: nil)
+                
+                if collisionObjs.count > 0 {
+                    for collisionObj in collisionObjs {
+                        if collisionObj.node.name == "wall" {
+                            return false
+                        }
+                    }
+                }
                 return true
             } else {
                 return false
             }
-        } else {
-            return false
-        }
+        //} else {
+          //  return false
+        //}
     }
     
     func updateCurrentTarget() {
@@ -119,35 +129,57 @@ class Enemy: SCNNode {
         if let currTarget = currentTarget {
             let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: currTarget.presentationNode.position)
             let distance = VectorMath.getVectorMagnitude(toTarget)
-            
-//            switch(distance) {
-//            case 0..<self.panicDistance:
-//                self.state = State.flee
-//            case self.panicDistance..<self.viewDistance+1:
-//                self.state = State.arrive
-//            default:
-//                self.state = State.wander
-            
+            print("distance: \(distance)")
+            print("self.attackDistance: \(attackDistance)")
             switch(distance) {
-                case 0..<self.viewDistance+1:
+            case 0..<self.attackDistance:
+                self.state = State.attack
+                print("attack state")
+            case self.attackDistance+3..<self.viewDistance+1:
                 self.state = State.arrive
-                default:
+                print("arrive state")
+            default:
                 self.state = State.wander
+                print("wander state")
             }
         } else {
             self.state = State.wander
+            print("wander state")
         }
     }
     
-    func performMovement() {
-        
+    func executeState(time: NSTimeInterval) {
         switch(self.state) {
+        case State.attack:
+            // Propel physics body towards player
+            if time - self.latestAttack > self.attackBreak {
+                let toTarget: SCNVector3 = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.currentTarget!.presentationNode.position)
+                let distance = VectorMath.getVectorMagnitude(toTarget)
+                var attackDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.currentTarget!.presentationNode.position)
+                attackDirection = VectorMath.getNormalizedVector(attackDirection)
+                self.physicsBody?.applyForce(VectorMath.multiplyVectorByScalar(attackDirection, right: distance*self.attackForce) , impulse: true)
+                
+                // after, move back wards
+                let waitAction = SCNAction.waitForDuration(0.5)
+                let moveBackwardsAction = SCNAction.runBlock({(SCNNode) -> Void in
+                    if let target = self.currentTarget {
+                        var fleeDirection = VectorMath.getDirectionVector(target.presentationNode.position, finishPoint: self.presentationNode.position)
+                        fleeDirection = VectorMath.getNormalizedVector(fleeDirection)
+                        let fleeForce = VectorMath.multiplyVectorByScalar(fleeDirection, right: distance/2)
+                        self.physicsBody?.applyForce(fleeForce, impulse: true)
+                    }
+                })
+                let actionSequence = SCNAction.sequence([waitAction,moveBackwardsAction])
+                self.runAction(actionSequence)
+                
+                self.latestAttack = time
+            }
         case State.flee:
-            var fleeForce = self.steer.flee(currentTarget!.presentationNode.position)
+            var fleeForce = self.steer.flee(self.currentTarget!.presentationNode.position)
             fleeForce = VectorMath.getNormalizedVector(fleeForce)
             self.physicsBody?.applyForce(fleeForce, impulse: true)
         case State.arrive:
-            var arriveForce = self.steer.arrive(currentTarget!.presentationNode.position)
+            var arriveForce = self.steer.arrive(self.currentTarget!.presentationNode.position)
             if arriveForce.x > 0 || arriveForce.y > 0 {
                 arriveForce = VectorMath.getNormalizedVector(arriveForce)
                 arriveForce = VectorMath.multiplyVectorByScalar(arriveForce, right: 0.8)
@@ -175,7 +207,7 @@ class Enemy: SCNNode {
             shouldBeFacingDirection = VectorMath.getNormalizedVector((self.physicsBody?.velocity)!)
         } else {
             // otherwise should be facing player
-            shouldBeFacingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: currentTarget!.presentationNode.position)
+            shouldBeFacingDirection = VectorMath.getDirectionVector(self.presentationNode.position, finishPoint: self.currentTarget!.presentationNode.position)
             shouldBeFacingDirection = VectorMath.getNormalizedVector(shouldBeFacingDirection)
         }
         
@@ -190,11 +222,6 @@ class Enemy: SCNNode {
         // 5 Rotate object about rotationAxis by rotationAngle
         if VectorMath.radiansToDegrees(rotationAngle) > 10 {
             self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
-            //if rotationAxis.y < 0 {
-              //  self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
-           // } else  {
-             //   self.physicsBody?.applyTorque(SCNVector4Make(rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle), impulse: true)
-           // }
         } else {
             self.physicsBody?.clearAllForces()
         }
@@ -207,7 +234,11 @@ class Enemy: SCNNode {
             self.runAction(attackedSoundAction)
             if health <= 0 {
                 let dyingSoundAction = SCNAction.playAudioSource(dyingAudioSource!, waitForCompletion: false)
-                self.runAction(dyingSoundAction)
+                let sendEnemyDeadNotificationAction = SCNAction.runBlock({(SCNNode) -> Void in
+                    NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.enemyDead, object: self, userInfo: ["enemy": self])
+                })
+                let actionSequence = SCNAction.sequence([dyingSoundAction,sendEnemyDeadNotificationAction])
+                self.runAction(actionSequence)
                 dead = true
             }
         }

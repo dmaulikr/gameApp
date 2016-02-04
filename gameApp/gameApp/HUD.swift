@@ -74,7 +74,7 @@ class HUD: SKScene {
     func setDeadView() {
         self.backgroundNode = SKSpriteNode(color: NSColor.blackColor(), size: CGSize(width: self.frame.width*2, height: self.frame.height*2))
         self.backgroundNode.position = CGPointMake(0, 0)
-        self.backgroundNode.alpha = 0.27
+        self.backgroundNode.alpha = 0.65
         self.deadLabel = SKLabelNode(fontNamed: "Cracked")
         self.deadLabel.name = "deadLabel"
         self.deadLabel.fontSize = 100

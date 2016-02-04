@@ -48,7 +48,7 @@ class ServiceManager : NSObject {
         self.serviceAdvertiser.startAdvertisingPeer()
         print("Starting advertising peer...")
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sendPlayerDeadMessage:", name: Constants.Notifications.sendPlayerDeadMessage, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sendMessageToController:", name: Constants.Notifications.sendMessageToController, object: nil)
     }
     
     deinit {
@@ -62,20 +62,18 @@ class ServiceManager : NSObject {
         return session
     }()
     
-    func sendPlayerDeadMessage(notification: NSNotification) {
-        let userInfo:Dictionary<String, MCPeerID!> = notification.userInfo as! Dictionary<String, MCPeerID!>
-        let playerMCPeerID: MCPeerID = userInfo["playerMCPeerID"]!
-        let playerDead = "playerDead"
-        let playerDeadData = NSKeyedArchiver.archivedDataWithRootObject(playerDead)
+    func sendMessageToController(notification: NSNotification) {
+        let userInfo:Dictionary<String, AnyObject!> = notification.userInfo as! Dictionary<String, AnyObject!>
+        let playerMCPeerID: MCPeerID = userInfo["playerMCPeerID"]! as! MCPeerID
+        let message: String = userInfo["message"]! as! String
+        let playerDeadData = NSKeyedArchiver.archivedDataWithRootObject(message)
         
         do {
             try session.sendData(playerDeadData, toPeers: [playerMCPeerID], withMode: MCSessionSendDataMode.Reliable)
         } catch {
             print("Error: Could not send data")
         }
-
     }
-    
 }
 
 extension ServiceManager : MCNearbyServiceAdvertiserDelegate {

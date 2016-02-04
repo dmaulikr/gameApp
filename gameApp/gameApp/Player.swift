@@ -30,10 +30,15 @@ class Player: SCNNode {
     var startedEnemyContact: Bool!
     
     let gruntAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/male-grunt.wav")!
+    var gruntSoundAction: SCNAction!
     let slurpAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/slurp.mp3")!
+    var slurpSoundAction: SCNAction!
     let popCorkAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/pop_cork.mp3")!
+    var popCorkSoundAction: SCNAction!
     let evilLaughAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/evilLaugh.mp3")!
+    var evilLaughSoundAction: SCNAction!
     let heartbeatAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/heartbeat.mp3")!
+    var heartbeatSoundAction: SCNAction!
     
     var movementDirectionVector: SCNVector3?
     var shootingDirectionVector: SCNVector3?
@@ -51,6 +56,7 @@ class Player: SCNNode {
         // Initialize player
         self.id = playerId
         self.levelNode = levelNode
+        
         super.init()
         let geometry = SCNBox(width: self.width, height: self.height, length: self.length, chamferRadius: 0)
         let material = SCNMaterial()
@@ -65,12 +71,13 @@ class Player: SCNNode {
         // Set player physics
         let bodyShape = SCNPhysicsShape(geometry: geometry, options: nil)
         self.physicsBody = SCNPhysicsBody(type: .Dynamic, shape: bodyShape)
-        self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 1.0, 0.0)
+        self.physicsBody?.angularVelocityFactor = SCNVector3Make(0.0, 0.0, 0.0)
         self.physicsBody?.categoryBitMask = ColliderType.Player
         self.physicsBody?.collisionBitMask = ColliderType.Ground | ColliderType.Wall | ColliderType.Enemy | ColliderType.Player | ColliderType.WorldItem
         self.physicsBody?.contactTestBitMask = ColliderType.InventoryItem
         self.physicsBody?.friction = 0.7
         self.physicsBody?.restitution = 0 // does not bounce during collisions
+        self.physicsBody?.angularDamping = 1.0
         
         horizontalRotation = SCNMatrix4MakeRotation(0, 0, 0, 0)
         oldHorizontalRotation = self.transform
@@ -79,9 +86,11 @@ class Player: SCNNode {
         movementDirectionVector = SCNVector3(x: 0, y: 0, z: 0)
         startedEnemyContact = false
         
-        gruntAudioSource.load()
-        slurpAudioSource.load()
-        popCorkAudioSource.load()
+        heartbeatSoundAction = SCNAction.playAudioSource(heartbeatAudioSource, waitForCompletion: false)
+        gruntSoundAction = SCNAction.playAudioSource(gruntAudioSource, waitForCompletion: false)
+        evilLaughSoundAction = SCNAction.playAudioSource(evilLaughAudioSource, waitForCompletion: false)
+        popCorkSoundAction = SCNAction.playAudioSource(popCorkAudioSource, waitForCompletion: false)
+        slurpSoundAction = SCNAction.playAudioSource(slurpAudioSource, waitForCompletion: false)
     }
     
     required init?(coder: NSCoder) {
@@ -188,6 +197,10 @@ class Player: SCNNode {
         }
     }
     
+    func rotate180Degrees() {
+        self.horizontalRotation = SCNMatrix4MakeRotation(CGFloat(M_PI), 0, 1, 0)
+    }
+    
     func updateCrosshairAim(){
         if fired == true {
             equippedWeapon?.fire(shootingDirectionVector!)
@@ -200,28 +213,39 @@ class Player: SCNNode {
     }
     
     func subtractPlayerHealth(damage: Int) {
-        self.health -= damage
-        
-        let gruntAction = SCNAction.playAudioSource(gruntAudioSource, waitForCompletion: false)
-        self.runAction(gruntAction)
-        
-        // Send notification to HUD to subtract health.
-        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "health": self.health])
-        
-        if self.health <= 0 {
-            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.setHudDeadView, object: self, userInfo: ["playerID": self.id!.hashValue])
+        if self.health > 0 {
+            self.health -= damage
+            self.runAction(gruntSoundAction)
             
-            // Disable player controls: Send notification
+            // Send notification to HUD to subtract health.
+            NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.updateHUD, object: self, userInfo: ["playerID": self.id!.hashValue, "health": self.health])
+            
             for peerKey in ConnectedPeers.dict.allKeys {
                 if (ConnectedPeers.dict.objectForKey(peerKey) as! Peer).player?.id == self.id {
-                    NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.sendPlayerDeadMessage, object: self, userInfo: ["playerMCPeerID": peerKey])
+                    NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.sendMessageToController, object: self, userInfo: ["playerMCPeerID": peerKey, "message": "playerDamaged"])
                 }
             }
-            let playerDeadLaugh = SCNAction.playAudioSource(evilLaughAudioSource, waitForCompletion: false)
-            self.runAction(playerDeadLaugh)
-        } else if self.health > 0 && self.health < 20 {
-            let heartbeatSound = SCNAction.playAudioSource(heartbeatAudioSource, waitForCompletion: false)
-            self.runAction(heartbeatSound)
+            
+            
+            if self.health <= 0 {
+                
+                // Disable player controls: Send notification
+                for peerKey in ConnectedPeers.dict.allKeys {
+                    if (ConnectedPeers.dict.objectForKey(peerKey) as! Peer).player?.id == self.id {
+                        NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.sendMessageToController, object: self, userInfo: ["playerMCPeerID": peerKey, "message": "playerDead"])
+                    }
+                }
+                NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerDeadHudUpdate, object: self, userInfo: ["playerID": self.id!.hashValue])
+                
+                let sendDeadNotificationAction = SCNAction.runBlock({(SCNNode) -> Void in
+                    NSNotificationCenter.defaultCenter().postNotificationName(Constants.Notifications.playerDead, object: self, userInfo: ["playerID": self.id!.hashValue])
+                })
+                let actionSequence = SCNAction.sequence([evilLaughSoundAction,sendDeadNotificationAction])
+                self.runAction(actionSequence)
+                
+            } else if self.health > 0 && self.health < 20 {
+                self.runAction(heartbeatSoundAction)
+            }
         }
     }
     
@@ -260,10 +284,8 @@ class Player: SCNNode {
             if self.health == self.healthMax {
                 return
             } else {
-                let popCorkSound = SCNAction.playAudioSource(popCorkAudioSource, waitForCompletion: true)
-                self.runAction(popCorkSound)
-                let slurpSound = SCNAction.playAudioSource(slurpAudioSource, waitForCompletion: true)
-                self.runAction(slurpSound)
+                self.runAction(popCorkSoundAction)
+                self.runAction(slurpSoundAction)
                 if self.health + inventoryItem.boostAmount! <= self.healthMax
                 {
                     self.health += inventoryItem.boostAmount!
@@ -276,11 +298,10 @@ class Player: SCNNode {
         }
         
         if inventoryItem.boostType == InventoryItem.BoostType.Ammo {
-            if self.equippedWeapon?.ammoCarried == self.equippedWeapon?.ammoCarriedMax && self.equippedWeapon?.ammoLoaded == self.equippedWeapon?.ammoLoadedMax {
+            if self.equippedWeapon?.ammoCarried == self.equippedWeapon?.ammoCarriedMax {
                 return
             } else {
-                let popCorkSound = SCNAction.playAudioSource(popCorkAudioSource, waitForCompletion: true)
-                self.runAction(popCorkSound)
+                self.runAction(popCorkSoundAction)
                 if self.equippedWeapon!.ammoCarried! + inventoryItem.boostAmount! <= self.equippedWeapon?.ammoCarriedMax!
                 {
                     self.equippedWeapon!.ammoCarried! += inventoryItem.boostAmount!

@@ -10,185 +10,170 @@ import Cocoa
 import SceneKit
 
 class GameLevel: NSObject {
-    var playerDict = NSMutableDictionary()
-    var enemyDict = NSMutableDictionary()
-    var enemy2: Enemy!
+    var currentLevel: Level!
     var ground: SCNNode!
     var light: SCNNode!
-    var levelNode: SCNNode!
-    var soundtrackAudioSource: SCNAudioSource!
-    
-    var movementDirectionVector: SCNVector3?
-    var shootingDirectionVector: SCNVector3?
+    var latestSpawn: NSTimeInterval!
     
     override init() {
         super.init()
-        
     }
     
-    func createLevel(parentScene: SCNScene) -> SCNNode {
+    func createLevel(parentScene: SCNScene, level: String) -> SCNNode {
         
-        parentScene.background.contents = "art.scnassets/Textures/skybox01_cube.png"
-        
-        levelNode = SCNNode()
-        
-        let levelScene = SCNScene(named: "art.scnassets/Levels/level2.scn")
-        let nodeArray = levelScene!.rootNode.childNodes
-        
-        for childNode in nodeArray {
-            
-            // Add model as child node
-            if childNode.name == "floor" {
-                let floorGeometry = SCNFloor()
-                floorGeometry.reflectivity = 0
-                let shape = SCNPhysicsShape(geometry: floorGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
-                childNode.physicsBody = SCNPhysicsBody(type: .Static, shape: shape)
-                childNode.physicsBody?.categoryBitMask = ColliderType.Ground
-                childNode.physicsBody?.collisionBitMask = ColliderType.Player | ColliderType.Enemy | ColliderType.InventoryItem | ColliderType.WorldItem
-                childNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Textures/SoilMud0010_1_S.jpg"
-                childNode.geometry?.firstMaterial?.diffuse.contentsTransform = SCNMatrix4MakeScale(1.5, 1.5, 1.5)
-                childNode.geometry?.firstMaterial?.shininess = 0
-            }
-            
-            if childNode.name == "wall" {
-                let wallGeometry = SCNBox(width: 200, height: 60, length: 30, chamferRadius: 1)
-                let shape = SCNPhysicsShape(geometry: wallGeometry, options: [SCNPhysicsShapeTypeKey: SCNPhysicsShapeTypeConvexHull])
-                childNode.physicsBody = SCNPhysicsBody(type: .Kinematic, shape: shape)
-                childNode.physicsBody?.categoryBitMask = ColliderType.Wall
-                childNode.physicsBody?.collisionBitMask = ColliderType.Weapon | ColliderType.Player | ColliderType.Enemy | ColliderType.PlayerBullet
-                childNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/Textures/ConcreteMossy0042_1_S.jpg"
-            }
-            
-            levelNode.addChildNode(childNode)
+        switch level {
+            case "horror":
+            currentLevel = LevelFactory.createHorrorLevel(parentScene)
+            case "extremeHorror":
+            currentLevel = LevelFactory.createExtremeHorrorLevel(parentScene)
+        default: break
         }
         
-        // Setup Player 1
-        let player1 = Player(playerId: Player.ID.ID1, levelNode: levelNode)
-        player1.position = SCNVector3Make(0, 0, 0)
-        playerDict.setObject(player1, forKey: (player1.id?.hashValue)!)
+        if let soundtrack = currentLevel.soundtrackAudioSource {
+            let soundtrackAction = SCNAction.playAudioSource(soundtrack, waitForCompletion: false)
+            currentLevel.worldNode.runAction(soundtrackAction)
+        }
         
-        // Set player to corresponding Peer
-        let peer1 = ConnectedPeers.dict.objectForKey(ConnectedPeers.firstConnectionPeerID!) as! Peer
-        peer1.player = player1
+        latestSpawn = 0.0
         
-        let player1Camera = Camera()
-        player1Camera.name = "camera"
-        player1Camera.position = SCNVector3(x: 0, y: player1.height, z: player1.length/2)
-        //player1Camera.camera?.zFar = 2500
-        player1.addChildNode(player1Camera)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "removeTracesOfDeadPlayer:", name: Constants.Notifications.playerDead, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "removeTracesOfDeadEnemy:", name: Constants.Notifications.enemyDead, object: nil)
         
-        let player1Weapon = WeaponFactory.createHandgun()
-        player1.ownCameraNode().addChildNode(player1Weapon)
-        player1.equippedWeapon = player1Weapon
-        player1Weapon.owner = player1
-        
-        
-        // Setup Player 2
-        let player2 = Player(playerId: Player.ID.ID2, levelNode: levelNode)
-        player2.position = SCNVector3Make(50, 0, 30)
-        levelNode.addChildNode(player2)
-        let peer2 = ConnectedPeers.dict.objectForKey(ConnectedPeers.secondConnectionPeerID!) as! Peer
-        peer2.player = player2
-        playerDict.setObject(player2, forKey: (player2.id?.hashValue)!)
-        
-        // create and add Player 2 camera to the scene
-        let player2Camera = Camera()
-        player2Camera.name = "camera"
-        player2Camera.position = SCNVector3(x: 0, y: player2.height, z: player2.length/2)
-        player2Camera.camera?.zFar = 2500
-        player2.addChildNode(player2Camera)
-        
-        // create Player 2 weapon
-        let player2Weapon = WeaponFactory.createHandgun()
-        player2Camera.addChildNode(player2Weapon)
-        player2.equippedWeapon = player2Weapon
-        player2Weapon.owner = player2
-        
-        // Setup water bottle
-        let waterBottle = InventoryItemFactory.createWaterBottle(SCNVector3Make(0, 0, -100))
-        levelNode.addChildNode(waterBottle)
-        
-        // Setup ammo box
-        let ammoBox = InventoryItemFactory.createAmmoBox(SCNVector3Make(0, 0, 0))
-        levelNode.addChildNode(ammoBox)
-        
-        // Setup sedan
-        let sedan = WorldItemFactory.createSedan(SCNVector3Make(-200, 0, 0))
-        levelNode.addChildNode(sedan)
-        
-        // Setup Enemy
-        //enemy2 = EnemyFactory.createRobbieRabit(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
-        enemy2 = EnemyFactory.createLambentMale(SCNVector3Make(-25, 0, -40), targets: [player1, player2], levelNode: levelNode)
-        levelNode.addChildNode(enemy2)
-        
-        //        let spotLight = SCNLight()
-        //        spotLight.type = SCNLightTypeSpot
-        //        spotLight.castsShadow = true
-        //        spotLight.zFar = 10
-        //        light = SCNNode()
-        //        light.light = spotLight
-        //        light.position = SCNVector3(x: 0, y: 15, z: 5)
-        //        let constraint = SCNLookAtConstraint(target: player1Weapon)
-        //        light.constraints = [constraint]
-        //        player1Camera.addChildNode(light)
-        
-        levelNode.addChildNode(player1)
-        levelNode.addChildNode(player2)
-        
-        soundtrackAudioSource = SCNAudioSource(fileNamed: "art.scnassets/Sounds/Tension Loop.wav")!
-        soundtrackAudioSource.load()
-        soundtrackAudioSource.loops = true
-        let soundtrackAction = SCNAction.playAudioSource(soundtrackAudioSource, waitForCompletion: true)
-        //levelNode.runAction(soundtrackAction)
-        
-        return levelNode
+        return currentLevel.worldNode
     }
     
     func playerAttack(playerID: Player.ID) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).playerAttack()
+        if let player = currentLevel.playerDict.objectForKey(playerID.hashValue){
+        (player as! Player).playerAttack()
+        }
     }
     
     func calculatePlayerMovementTransform(playerID: Player.ID, panx: CGFloat, pany: CGFloat) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).calculateMovementTransform(panx, pany: pany)
+        if let player = currentLevel.playerDict.objectForKey(playerID.hashValue){
+        (player as! Player).calculateMovementTransform(panx, pany: pany)
+        }
     }
     
     func calculateCameraRotationTransform(playerID: Player.ID, panx: CGFloat, pany: CGFloat) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).calculateRotationTransform(panx, pany: pany)
+        if let player = currentLevel.playerDict.objectForKey(playerID.hashValue){
+            (player as! Player).calculateRotationTransform(panx, pany: pany)
+        }
+    }
+    
+    func rotatePlayer180Degrees(playerID: Player.ID) {
+        (currentLevel.playerDict.objectForKey(playerID.hashValue) as! Player).rotate180Degrees()
     }
     
     func updateCrosshairAim(){
-        (playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).updateCrosshairAim()
-        (playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).updateCrosshairAim()
+        if let player1 = currentLevel.playerDict.objectForKey(Player.ID.ID1.hashValue) {
+            (player1 as! Player).updateCrosshairAim()
+        }
+        
+        if let player2 = currentLevel.playerDict.objectForKey(Player.ID.ID2.hashValue) {
+            (player2 as! Player).updateCrosshairAim()
+        }
     }
     
-    func damageEnemy() {
-        enemy2.applyDamage((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).equippedWeapon!.baseDamage!+((playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).damage))
+    func damageEnemy(enemy: Enemy) {
+        if let player1 = currentLevel.playerDict.objectForKey(Player.ID.ID1.hashValue) {
+            enemy.applyDamage((player1 as! Player).equippedWeapon!.baseDamage!+(player1 as! Player).damage)
+        } else {
+            let player2 = currentLevel.playerDict.objectForKey(Player.ID.ID2.hashValue)
+            enemy.applyDamage((player2 as! Player).equippedWeapon!.baseDamage!+(player2 as! Player).damage)
+        }
     }
     
-    func updateEnemy() {
-        enemy2.update()
+    func updateAllEnemies(time: NSTimeInterval) {
+        for enemy in currentLevel.enemyArray {
+            enemy.update(time)
+        }
     }
     
     func updatePlayersTransform() {
-        (playerDict.objectForKey(Player.ID.ID1.hashValue) as! Player).updatePlayerTransform()
-        (playerDict.objectForKey(Player.ID.ID2.hashValue) as! Player).updatePlayerTransform()
+        if let player1 = currentLevel.playerDict.objectForKey(Player.ID.ID1.hashValue) {
+            (player1 as! Player).updatePlayerTransform()
+        }
+        
+        if let player2 = currentLevel.playerDict.objectForKey(Player.ID.ID2.hashValue) {
+            (player2 as! Player).updatePlayerTransform()
+        }
     }
     
     func damagePlayer(playerID: Player.ID, enemy: Enemy) {
         // Calculate damage level
         let damage = Int(arc4random_uniform(UInt32(enemy.damage)))
-        (playerDict.objectForKey(playerID.hashValue) as! Player).subtractPlayerHealth(damage)
+        if let player = currentLevel.playerDict.objectForKey(playerID.hashValue) {
+        (player as! Player).subtractPlayerHealth(damage)
+        }
     }
     
     func inventoryBoosterForPlayer(playerID: Player.ID, inventoryItem: InventoryItem) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).equipBooster(inventoryItem)
+         if let player = currentLevel.playerDict.objectForKey(playerID.hashValue) {
+        (player as! Player).equipBooster(inventoryItem)
+        }
     }
     
     func jump(playerID: Player.ID) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).jump()
+        (currentLevel.playerDict.objectForKey(playerID.hashValue) as! Player).jump()
     }
     
     func playerReloadWeapon(playerID: Player.ID) {
-        (playerDict.objectForKey(playerID.hashValue) as! Player).reloadWeapon()
+         if let player = currentLevel.playerDict.objectForKey(playerID.hashValue) {
+        (player as! Player).reloadWeapon()
+        }
+    }
+    
+    func removeTracesOfDeadPlayer(notification: NSNotification) {
+        let dict:Dictionary<String,AnyObject> = notification.userInfo as! Dictionary<String,AnyObject>
+        let playerIDHash = dict["playerID"] as! Int
+        
+        // First remove from all enemy list
+        for enemy in currentLevel.enemyArray {
+            for (index, value) in enemy.targets.enumerate() {
+                if value.id?.hashValue == playerIDHash {
+                    enemy.targets.removeAtIndex(index)
+                }
+            }
+        }
+        
+        // Then remove from parent node
+        let deadPlayer = (currentLevel.playerDict.objectForKey(playerIDHash) as! Player)
+        deadPlayer.removeAllActions()
+        deadPlayer.removeFromParentNode()
+        
+        // Remove from dict
+        currentLevel.playerDict.removeObjectForKey(playerIDHash)
+    }
+    
+    func removeTracesOfDeadEnemy(notification: NSNotification) {
+        let dict:Dictionary<String,AnyObject> = notification.userInfo as! Dictionary<String,AnyObject>
+        let deadEnemy = dict["enemy"] as! Enemy
+        
+        for (index, enemy) in currentLevel.enemyArray.enumerate() {
+            if enemy.isEqual(deadEnemy){
+            currentLevel.enemyArray.removeAtIndex(index)
+            enemy.physicsBody?.angularVelocityFactor = SCNVector3Make(1.0, 1.0, 0.0)
+            enemy.physicsBody?.applyTorque(SCNVector4Make(-1,0,0, CGFloat(M_PI_2)), impulse: true)
+            let fadeOut = SCNAction.fadeOutWithDuration(1.0)
+            let removeFromParent = SCNAction.removeFromParentNode()
+            let sequence = SCNAction.sequence([fadeOut, removeFromParent])
+            enemy.runAction(sequence)
+            }
+        }
+    }
+    
+    func spawnEnemy(time: NSTimeInterval) {
+        if time - latestSpawn > currentLevel.spawnPeriod {
+            let randomIndex = Int(arc4random_uniform(UInt32(currentLevel.spawnLocations.count)))
+            let spawnLocation = currentLevel.spawnLocations[randomIndex]
+            var targetsArray = [Player]()
+            for key in currentLevel.playerDict.allKeys {
+                targetsArray.append(currentLevel.playerDict.objectForKey(key) as! Player)
+            }
+            let newEnemy = currentLevel.createEnemy(spawnLocation, targetsArray: targetsArray)
+            currentLevel.worldNode.addChildNode(newEnemy)
+            currentLevel.enemyArray.append(newEnemy)
+            latestSpawn = time
+        }
     }
 }

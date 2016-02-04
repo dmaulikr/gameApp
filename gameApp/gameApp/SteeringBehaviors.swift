@@ -91,7 +91,7 @@ class SteeringBehaviors: NSObject {
             deceleration = Deceleration.Slow
         }
         
-        if distance > 25 {
+        if distance > owner.attackDistance {
             let decelerationTweaker: CGFloat = 60
             
             // calculate the speed required to reach the target given the desired deceleration
@@ -227,7 +227,7 @@ class SteeringBehaviors: NSObject {
         var wanderForce = VectorMath.addVectorToVector(circleCenter, right: rotatedVector)
         
         // Make the wander force less strong so enemy walks slower
-        wanderForce = VectorMath.multiplyVectorByScalar(wanderForce, right: 0.7)
+        wanderForce = VectorMath.multiplyVectorByScalar(wanderForce, right: 1)
         
         steering = VectorMath.addVectorToVector(steering, right: wanderForce)
         
@@ -254,22 +254,8 @@ class SteeringBehaviors: NSObject {
         // this represents the owner's line of sight
         // Forward Direction Vector
         let ownerDirection = VectorMath.getNormalizedVector((owner.physicsBody?.velocity)!)
-        let seeAhead = VectorMath.multiplyVectorByScalar(ownerDirection, right: 50)
+        let seeAhead = VectorMath.multiplyVectorByScalar(ownerDirection, right: owner.viewDistance)
         let seeAheadPoint = VectorMath.addVectorToVector(owner.presentationNode.position, right: seeAhead)
-        
-        // Left Feeler
-        let rotationMatrix = SCNMatrix4MakeRotation(CGFloat(M_PI_4), 0, -1, 0)
-        let glkVector = GLKVector3Make(Float(seeAhead.x), Float(seeAhead.y), Float(seeAhead.z))
-        let glkMatrix = GLKMatrix4Make(Float(rotationMatrix.m11), Float(rotationMatrix.m12), Float(rotationMatrix.m13), Float(rotationMatrix.m14), Float(rotationMatrix.m21), Float(rotationMatrix.m22), Float(rotationMatrix.m23), Float(rotationMatrix.m24), Float(rotationMatrix.m31), Float(rotationMatrix.m32), Float(rotationMatrix.m33), Float(rotationMatrix.m34), Float(rotationMatrix.m41), Float(rotationMatrix.m42), Float(rotationMatrix.m43), Float(rotationMatrix.m44))
-        let glkRotatedVector = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix, glkVector)
-        var leftFeeler = SCNVector3FromGLKVector3(glkRotatedVector)
-        
-        // Right Feeler
-        let rotationMatrix2 = SCNMatrix4MakeRotation(CGFloat(M_PI_4), 0, 1, 0)
-        let glkVector2 = GLKVector3Make(Float(seeAhead.x), Float(seeAhead.y), Float(seeAhead.z))
-        let glkMatrix2 = GLKMatrix4Make(Float(rotationMatrix2.m11), Float(rotationMatrix2.m12), Float(rotationMatrix2.m13), Float(rotationMatrix2.m14), Float(rotationMatrix2.m21), Float(rotationMatrix2.m22), Float(rotationMatrix2.m23), Float(rotationMatrix2.m24), Float(rotationMatrix2.m31), Float(rotationMatrix2.m32), Float(rotationMatrix2.m33), Float(rotationMatrix2.m34), Float(rotationMatrix2.m41), Float(rotationMatrix2.m42), Float(rotationMatrix2.m43), Float(rotationMatrix2.m44))
-        let glkRotatedVector2 = GLKMatrix4MultiplyVector3WithTranslation(glkMatrix2, glkVector2)
-        var rightFeeler = SCNVector3FromGLKVector3(glkRotatedVector2)
         
         // now perform a hit-test based on the seeAhead line segment
         // returns the closest collision object to the owner
@@ -278,7 +264,7 @@ class SteeringBehaviors: NSObject {
         var firstCollisionObj: SCNNode?
         if collisionObjs.count > 0 {
             for collisionObj in collisionObjs {
-                if collisionObj.node.name == "wall" {
+                if collisionObj.node.name == "wall" || collisionObj.node.name == "enemy" {
                     firstCollisionObj = collisionObj.node
                     break
                 }
@@ -291,9 +277,6 @@ class SteeringBehaviors: NSObject {
         
         // Calculate avoidance force scalar
         let scalar = (1/distanceToWall)*200
-            
-        // get wall normal ??
-        let globalWallNormal = owner.levelNode.convertPosition(SCNVector3Make(0, 0, 1), fromNode: firstObj.presentationNode)
         
         // avoidance force
         // determined by: collision seeAhead - collision point

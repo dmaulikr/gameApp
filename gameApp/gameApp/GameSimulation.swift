@@ -25,6 +25,7 @@ struct Keystroke {
     enum InteractionType {
         case Button
         case Trackpad
+        case Shake
     }
     enum TrackpadType {
         case Movement
@@ -61,12 +62,12 @@ class GameSimulation: SCNScene {
     
     var gameLevel: GameLevel!
     
-    override init() {
+    init(level: String) {
         super.init()
         
         self.physicsWorld.contactDelegate = self
         self.gameLevel = GameLevel()
-        let levelNode: SCNNode = gameLevel.createLevel(self)
+        let levelNode: SCNNode = gameLevel.createLevel(self, level: level)
         self.rootNode.addChildNode(levelNode)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerControls:", name: Constants.Notifications.playerControls, object: nil)
         
@@ -87,7 +88,6 @@ class GameSimulation: SCNScene {
         
         switch strokeInfo.interactionType! {
         case .Trackpad:
-            
             switch strokeInfo.trackpadType! {
                 
             case .Movement:
@@ -106,7 +106,8 @@ class GameSimulation: SCNScene {
                 switch strokeInfo.gestureType! {
                 case .Tap:
                     break
-                    //gameLevel.jump(peer.player!.id!)
+                    // rotate player 180 degrees
+                    //gameLevel.rotatePlayer180Degrees(peer.player!.id!)
                 case .Pan:
                     // Change camera view
                     if strokeInfo.panTranslation != nil {
@@ -120,15 +121,15 @@ class GameSimulation: SCNScene {
             }
         case .Button:
             switch strokeInfo.button! {
-            case .Crouch:
-                print("the button event was crouch")
             case .Attack:
                 gameLevel.playerAttack(peer.player!.id!)
-            case .Interact:
-                print ("the button event was interact")
             case .Reload:
                 gameLevel.playerReloadWeapon(peer.player!.id!)
+            default:
+                break
             }
+        case .Shake:
+            gameLevel.playerReloadWeapon(peer.player!.id!)
         }
     }
 }
@@ -141,7 +142,8 @@ extension GameSimulation : SCNSceneRendererDelegate {
     func renderer(renderer: SCNSceneRenderer, updateAtTime time: NSTimeInterval) {
         gameLevel.updatePlayersTransform()
         gameLevel.updateCrosshairAim()
-        gameLevel.updateEnemy()
+        gameLevel.spawnEnemy(time)
+        gameLevel.updateAllEnemies(time)
         
     }
     
@@ -197,7 +199,7 @@ extension GameSimulation : SCNPhysicsContactDelegate {
             if contact.nodeA.physicsBody!.categoryBitMask == ColliderType.PlayerBullet {
                 let bullet = contact.nodeA
                 if bullet.parentNode != nil {
-                    gameLevel.damageEnemy()
+                    gameLevel.damageEnemy(contact.nodeB as! Enemy)
                 }
                 bullet.geometry?.firstMaterial?.normal.contents = nil
                 bullet.geometry?.firstMaterial?.diffuse.contents = nil
@@ -205,7 +207,7 @@ extension GameSimulation : SCNPhysicsContactDelegate {
             } else {
                 let bullet = contact.nodeB
                 if bullet.parentNode != nil {
-                    gameLevel.damageEnemy()
+                    gameLevel.damageEnemy(contact.nodeA as! Enemy)
                 }
                 bullet.geometry?.firstMaterial?.normal.contents = nil
                 bullet.geometry?.firstMaterial?.diffuse.contents = nil
